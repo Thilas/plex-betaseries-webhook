@@ -1,0 +1,13 @@
+server:
+  # url: ''
+  port: 12000
+  temp: /tmp/plex-betaseries-webhook
+
+betaseries:
+  url: https://www.betaseries.com/
+  client:
+    url: https://api.betaseries.com/
+    apiVersion: '3.0'
+    timeoutInSeconds: 5
+    # clientId: ''
+    # clientSecret: ''

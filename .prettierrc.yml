@@ -1,0 +1,8 @@
+semi: false
+overrides:
+  - files: '**/*.[jt]s'
+    options:
+      trailingComma: all
+  - files: '**/*.yml'
+    options:
+      singleQuote: true
