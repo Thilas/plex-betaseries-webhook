@@ -1,8 +1,4 @@
-.*
-build.sh
 coverage/
 dist/
-Dockerfile
-jest.*.js
 node_modules/
-run.sh
+tmp/

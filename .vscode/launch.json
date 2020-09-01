@@ -7,10 +7,10 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
+      "preLaunchTask": "Build",
       "runtimeArgs": ["--unhandled-rejections=strict"],
       "program": "${workspaceFolder}/src/app.ts",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "preLaunchTask": "Build"
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "type": "node",

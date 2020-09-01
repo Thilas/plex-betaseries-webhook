@@ -75,39 +75,61 @@ describe("server", () => {
   })
 
   describe("betaseries authentication", () => {
-    // eslint-disable-next-line jest/expect-expect
     it("redirects if no code", async () => {
       // arrange
-      const bsMock = new Mock<BetaSeries>().setup((i) => i.redirectForUserCode(It.IsAny(), It.IsAny())).returns()
-      const { app } = initializeServer(bsMock.object())
+      const betaSeries = new Mock<BetaSeries>()
+        .setup((i) => i.getAuthenticationUrl(It.IsAny()))
+        .returns("fakeAuthUrl")
+        .object()
+      const { app } = initializeServer(betaSeries)
       // act
-      await request(app).get("")
+      const res = await request(app).get("")
       // assert
-      bsMock.verify((i) => i.redirectForUserCode(It.IsAny(), selfUrl))
+      expect(res.redirect).toBeTruthy()
+      expect(res.headers).toHaveProperty("location", "fakeAuthUrl")
     })
 
-    // eslint-disable-next-line jest/expect-expect
+    it("gets and displays access token if code", async () => {
+      // arrange
+      const betaSeries = new Mock<BetaSeries>()
+        .setup((i) => i.getAccessToken(It.IsAny(), It.IsAny()))
+        .returns(Promise.resolve({ accessToken: "fakeAccessToken", login: "fakeLogin" }))
+        .object()
+      const { app } = initializeServer(betaSeries, { url: "fakeWebhookUrl" })
+      // act
+      const res = await request(app).get("?code=fakeCode")
+      // assert
+      expect(res.status).toEqual(200)
+      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\?accessToken=fakeAccessToken\b/)
+    })
+
     it("displays access token if code", async () => {
       // arrange
-      const bsMock = new Mock<BetaSeries>()
-        .setup((i) => i.displayAccessToken(It.IsAny(), It.IsAny(), It.IsAny(), It.IsAny()))
-        .returns(Promise.resolve())
-      const { app } = initializeServer(bsMock.object())
+      const member = new Mock<IBetaSeriesMember>()
+        .setup((i) => i.login)
+        .returns("fakeLogin")
+        .object()
+      const betaSeries = new Mock<BetaSeries>()
+        .setup((i) => i.getMember(It.IsAny()))
+        .returns(Promise.resolve(member))
+        .object()
+      const { app } = initializeServer(betaSeries, { url: "fakeWebhookUrl" })
       // act
-      await request(app).get("?code=fakeCode")
+      const res = await request(app).get("?accessToken=fakeAccessToken")
       // assert
-      bsMock.verify((i) => i.displayAccessToken(It.IsAny(), selfUrl, "fakeCode", It.IsAny()))
+      expect(res.status).toEqual(200)
+      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\?accessToken=fakeAccessToken\b/)
     })
   })
 
   describe("plex webhook", () => {
     const initialize = () => {
-      const mbMock = new Mock<IBetaSeriesMember>()
-      const bsMock = new Mock<BetaSeries>()
+      const memberMock = new Mock<IBetaSeriesMember>()
+      const betaSeriesMock = new Mock<BetaSeries>()
         .setup((bs) => bs.getMember(It.IsAny()))
-        .returns(Promise.resolve(mbMock.object()))
-      const { app } = initializeServer(bsMock.object())
-      return { app, bsMock, mbMock }
+        .returns(Promise.resolve(memberMock.object()))
+      const { app } = initializeServer(betaSeriesMock.object())
+      return { app, memberMock }
     }
 
     describe("payload", () => {
@@ -319,7 +341,7 @@ describe("server", () => {
 
           it("fails if not found", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([]))
             // act
             const res = await request(app).post(url).field(payload)
@@ -330,7 +352,7 @@ describe("server", () => {
 
           it("fails if found multiple times", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock
               .setup((i) => i.getEpisodes(It.IsAny()))
               .returns(Promise.resolve([{} as BetaSeriesEpisode, {} as BetaSeriesEpisode]))
@@ -343,7 +365,7 @@ describe("server", () => {
 
           it("succeeds if already scrobbled", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock
               .setup((i) => i.getEpisodes(It.IsAny()))
               .returns(Promise.resolve([{ user: { seen: true } } as BetaSeriesEpisode]))
@@ -360,7 +382,7 @@ describe("server", () => {
 
           it("fails if unable to scrobble", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([betaSeriesEpisode]))
             mbMock
               .setup((i) => i.markEpisodeAsWatched(It.IsAny()))
@@ -374,7 +396,7 @@ describe("server", () => {
 
           it("succeeds if not already scrobbled", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([betaSeriesEpisode]))
             mbMock
               .setup((i) => i.markEpisodeAsWatched(It.IsAny()))
@@ -441,7 +463,7 @@ describe("server", () => {
 
           it("fails if not found", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getMovie(It.IsAny())).returns(Promise.resolve(undefined))
             // act
             const res = await request(app).post(url).field(payload)
@@ -452,7 +474,7 @@ describe("server", () => {
 
           it("succeeds if already scrobbled", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock
               .setup((i) => i.getMovie(It.IsAny()))
               .returns(Promise.resolve({ user: { status: BetaSeriesMovieStatus.seen } } as BetaSeriesMovie))
@@ -469,7 +491,7 @@ describe("server", () => {
 
           it("fails if unable to scrobble", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getMovie(It.IsAny())).returns(Promise.resolve(betaSeriesMovie))
             mbMock
               .setup((i) => i.updateMovie(It.IsAny()))
@@ -483,7 +505,7 @@ describe("server", () => {
 
           it("succeeds if not already scrobbled", async () => {
             // arrange
-            const { app, mbMock } = initialize()
+            const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getMovie(It.IsAny())).returns(Promise.resolve(betaSeriesMovie))
             mbMock
               .setup((i) => i.updateMovie(It.IsAny()))

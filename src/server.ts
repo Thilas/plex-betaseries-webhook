@@ -5,7 +5,7 @@ import { usePlexWebhook } from "./plex/plex"
 
 type ServerConfig = {
   readonly url?: string
-  readonly port: number
+  readonly port?: number
   readonly temp?: string
 }
 

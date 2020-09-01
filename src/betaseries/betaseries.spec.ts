@@ -1,6 +1,4 @@
 import MockAdapter from "axios-mock-adapter/types"
-import { Response } from "express"
-import { It, Mock } from "moq.ts"
 import { AxiosInstanceMock } from "../../test/axios"
 import { BetaSeries } from "./betaseries"
 import { BetaSeriesMovieStatus } from "./models"
@@ -56,14 +54,11 @@ describe("betaseries", () => {
   }
 
   describe("redirect for user code", () => {
-    // eslint-disable-next-line jest/expect-expect
     it("succeeds", () => {
-      // arrange
-      const resMock = new Mock<Response>().setup((i) => i.redirect(It.IsAny())).returns()
       // act
-      betaSeries.redirectForUserCode(resMock.object(), "fakeSelfUrl")
+      const authUrl = betaSeries.getAuthenticationUrl("fakeSelfUrl")
       // assert
-      resMock.verify((i) => i.redirect("fakeUrl/authorize?client_id=fakeClientId&redirect_uri=fakeSelfUrl"))
+      expect(authUrl).toEqual("fakeUrl/authorize?client_id=fakeClientId&redirect_uri=fakeSelfUrl")
     })
   })
 
@@ -85,15 +80,11 @@ describe("betaseries", () => {
           .replyOnce(200, { access_token: "fakeAccessToken" })
       })
       mockAxiosInstanceForMember()
-      const resMock = new Mock<Response>()
-      resMock.setup((i) => i.send()).returns(resMock.object())
-      const getUrl = (accessToken: string) => `fakeWebhookUrl#${accessToken}`
       // act
-      await betaSeries.displayAccessToken(resMock.object(), "fakeSelfUrl", "fakeCode", getUrl)
+      const { accessToken, login } = await betaSeries.getAccessToken("fakeSelfUrl", "fakeCode")
       // assert
-      resMock.verify((i) =>
-        i.send(It.Is((param: string) => !!param.match(/\bfakeLogin\b.*\bfakeWebhookUrl#fakeAccessToken\b/))),
-      )
+      expect(accessToken).toEqual("fakeAccessToken")
+      expect(login).toEqual("fakeLogin")
     })
   })
 

@@ -1,0 +1,10 @@
+server:
+  url: SERVER_URL
+  port: SERVER_PORT
+  temp: SERVER_TEMP
+
+betaseries:
+  client:
+    timeoutInSeconds: BETASERIES_TIMEOUT
+    clientId: BETASERIES_CLIENTID
+    clientSecret: BETASERIES_CLIENTSECRET

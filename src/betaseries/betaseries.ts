@@ -1,14 +1,15 @@
 import { AxiosInstance } from "axios"
 import buildUrl from "build-url"
-import { Response } from "express"
 import { ImdbId, MediaId, TvdbId } from "../plex/media/ids"
 import { ClientConfig, getAccessToken, initializeClient } from "./client"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./models"
 
 export class BetaSeries {
+  static readonly codeKey = "code"
+
   constructor(readonly config: { readonly url: string; readonly client: ClientConfig }) {}
 
-  redirectForUserCode(res: Response, selfUrl: string) {
+  getAuthenticationUrl(selfUrl: string) {
     const url = buildUrl(this.config.url, {
       path: "authorize",
       queryParams: {
@@ -17,15 +18,14 @@ export class BetaSeries {
       },
     })
     console.log("Requesting BetaSeries authentication...")
-    res.redirect(url)
+    return url
   }
 
-  async displayAccessToken(res: Response, selfUrl: string, code: string, getUrl: (accessToken: string) => string) {
+  async getAccessToken(selfUrl: string, code: string) {
     console.log("Requesting a new access token...")
     const { accessToken, login } = await getAccessToken(this.config.client, selfUrl, code)
-    const url = getUrl(accessToken)
-    res.send(`Plex webhook for ${login}: ${url.link(url)}`)
     console.log(`New access token is ready for ${login}`)
+    return { accessToken, login }
   }
 
   async getMember(accessToken: string) {
