@@ -26,16 +26,17 @@ describe("server", () => {
   //#endregion
 
   const selfUrl = "http://localhost/"
+  const url = "/token/fakeAccessToken"
 
   describe("configuration", () => {
     //#region Webhook mock
-    let initialized: ReturnType<typeof initializeServer>
+    let webhook: ReturnType<typeof initializeServer>
     beforeEach(() => {
       jest.spyOn(plex, "usePlexWebhook")
     })
     afterEach((done) => {
       jest.restoreAllMocks()
-      initialized.server?.then((server) => {
+      webhook.server?.then((server) => {
         server.close()
         done()
       })
@@ -46,19 +47,19 @@ describe("server", () => {
 
     it("uses default url", () => {
       // act
-      initialized = initializeServer(betaSeries, undefined, true)
+      webhook = initializeServer(betaSeries, undefined, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
-      expect(plex.usePlexWebhook).toHaveBeenCalledWith(initialized.app, selfUrl, expect.anything(), betaSeries)
+      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, selfUrl, expect.anything(), betaSeries)
     })
 
     it("uses default url with specified port", () => {
       // act
-      initialized = initializeServer(betaSeries, { port: 123 }, true)
+      webhook = initializeServer(betaSeries, { port: 123 }, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
       expect(plex.usePlexWebhook).toHaveBeenCalledWith(
-        initialized.app,
+        webhook.app,
         "http://localhost:123/",
         expect.anything(),
         betaSeries,
@@ -67,10 +68,10 @@ describe("server", () => {
 
     it("uses specified url", () => {
       // act
-      initialized = initializeServer(betaSeries, { url: "fakeUrl", port: 123 }, true)
+      webhook = initializeServer(betaSeries, { url: "fakeUrl", port: 123 }, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
-      expect(plex.usePlexWebhook).toHaveBeenCalledWith(initialized.app, "fakeUrl", expect.anything(), betaSeries)
+      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "fakeUrl", expect.anything(), betaSeries)
     })
   })
 
@@ -83,7 +84,7 @@ describe("server", () => {
         .object()
       const { app } = initializeServer(betaSeries)
       // act
-      const res = await request(app).get("")
+      const res = await request(app).get("/")
       // assert
       expect(res.redirect).toBeTruthy()
       expect(res.headers).toHaveProperty("location", "fakeAuthUrl")
@@ -97,10 +98,10 @@ describe("server", () => {
         .object()
       const { app } = initializeServer(betaSeries, { url: "fakeWebhookUrl" })
       // act
-      const res = await request(app).get("?code=fakeCode")
+      const res = await request(app).get("/?code=fakeCode")
       // assert
       expect(res.status).toEqual(200)
-      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\?accessToken=fakeAccessToken\b/)
+      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\/token\/fakeAccessToken\b/)
     })
 
     it("displays access token if code", async () => {
@@ -115,10 +116,10 @@ describe("server", () => {
         .object()
       const { app } = initializeServer(betaSeries, { url: "fakeWebhookUrl" })
       // act
-      const res = await request(app).get("?accessToken=fakeAccessToken")
+      const res = await request(app).get(url)
       // assert
       expect(res.status).toEqual(200)
-      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\?accessToken=fakeAccessToken\b/)
+      expect(res.text).toMatch(/\bfakeLogin\b.*\bfakeWebhookUrl\/token\/fakeAccessToken\b/)
     })
   })
 
@@ -137,28 +138,12 @@ describe("server", () => {
         // arrange
         const { app } = initialize()
         // act
-        const res = await request(app).post("").send("data")
+        const res = await request(app).post(url).send("data")
         // assert
         expect(res.status).toEqual(400)
         expect(res.text).toEqual("Missing payload")
       })
     })
-
-    describe("access token", () => {
-      it("fails if missing", async () => {
-        // arrange
-        const { app } = initialize()
-        // act
-        const res = await request(app)
-          .post("")
-          .field({ payload: JSON.stringify({ fakeKey: "fakeValue" }) })
-        // assert
-        expect(res.status).toEqual(400)
-        expect(res.text).toEqual("A single accessToken query parameter is required")
-      })
-    })
-
-    const url = "?accessToken=fakeToken"
 
     describe("metadata type", () => {
       it("warns if missing", async () => {

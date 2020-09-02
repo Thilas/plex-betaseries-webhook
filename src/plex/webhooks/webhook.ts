@@ -9,9 +9,8 @@ export abstract class Webhook<M> {
   }
 
   processEvent(event: string) {
-    switch (event) {
-      case "media.scrobble":
-        return this.processScrobble()
+    if (event === "media.scrobble") {
+      return this.processScrobble()
     }
     return Promise.resolve()
   }

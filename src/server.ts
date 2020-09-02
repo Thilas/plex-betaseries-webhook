@@ -12,7 +12,8 @@ type ServerConfig = {
 export function initializeServer(betaSeries: BetaSeries, serverConfig?: ServerConfig, listen = false) {
   const app = express()
 
-  const url = serverConfig?.url ?? `http://localhost${serverConfig?.port ? `:${serverConfig?.port}` : ""}/`
+  const port = serverConfig?.port ? `:${serverConfig?.port}` : ""
+  const url = serverConfig?.url ?? `http://localhost${port}/`
   usePlexWebhook(app, url, { dest: serverConfig?.temp }, betaSeries)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
@@ -23,10 +24,10 @@ export function initializeServer(betaSeries: BetaSeries, serverConfig?: ServerCo
 
   const server = listen
     ? new Promise<Server>((resolve) => {
-        const server = app.listen(serverConfig?.port ?? 80)
-        server.on("listening", () => {
+        const result = app.listen(serverConfig?.port ?? 80)
+        result.on("listening", () => {
           console.log(`Express app running at ${url}`)
-          resolve(server)
+          resolve(result)
         })
       })
     : undefined

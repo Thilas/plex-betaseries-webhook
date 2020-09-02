@@ -13,14 +13,8 @@ export function usePlexWebhook(
   betaSeries: BetaSeries,
 ) {
   // BetaSeries authentication
-  app.get("", async (req, res, next) => {
+  app.route("/").get(async (req, res, next) => {
     try {
-      const accessToken = getAccessToken(req.query)
-      if (accessToken) {
-        const member = await getBetaSeriesMember(betaSeries, accessToken)
-        displayAccessToken(res, selfUrl, accessToken, member.login)
-        return
-      }
       const code = getCode(req.query)
       if (code) {
         const { accessToken, login } = await betaSeries.getAccessToken(selfUrl, code)
@@ -35,29 +29,29 @@ export function usePlexWebhook(
   })
 
   // Plex webhook
-  const upload = multer(uploadOptions)
-  app.post("", upload.any(), async (req, res, next) => {
-    try {
-      const payload = getPayload(req.body?.payload)
-      const accessToken = getAccessToken(req.query)
-      const member = await getBetaSeriesMember(betaSeries, accessToken)
-      const webhook = getWebhook(payload, member)
-      await webhook?.processEvent(payload.event)
-      res.sendStatus(200)
-    } catch (error) {
-      next(error)
-    }
-  })
+  app
+    .route("/token/:accessToken")
+    .get(async (req, res, next) => {
+      try {
+        const member = await getBetaSeriesMember(betaSeries, req.params.accessToken)
+        displayAccessToken(res, selfUrl, req.params.accessToken, member.login)
+      } catch (error) {
+        next(error)
+      }
+    })
+    .post(multer(uploadOptions).any(), async (req, res, next) => {
+      try {
+        const payload = getPayload(req.body?.payload)
+        const member = await getBetaSeriesMember(betaSeries, req.params.accessToken)
+        const webhook = getWebhook(payload, member)
+        await webhook?.processEvent(payload.event)
+        res.sendStatus(200)
+      } catch (error) {
+        next(error)
+      }
+    })
 
   return app
-}
-
-function getAccessToken(query: express.Request["query"]) {
-  const accessToken = query.accessToken
-  if (typeof accessToken !== "string") {
-    return
-  }
-  return accessToken
 }
 
 function getCode(query: express.Request["query"]) {
@@ -70,9 +64,7 @@ function getCode(query: express.Request["query"]) {
 
 function displayAccessToken(res: Response, selfUrl: string, accessToken: string, login: string) {
   const url = buildUrl(selfUrl, {
-    queryParams: {
-      accessToken: accessToken,
-    },
+    path: `token/${accessToken}`,
   })
   res.send(`Plex webhook for ${login}: ${url.link(url)}`)
 }
