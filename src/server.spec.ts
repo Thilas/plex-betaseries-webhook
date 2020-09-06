@@ -25,9 +25,6 @@ describe("server", () => {
   })
   //#endregion
 
-  const selfUrl = "http://localhost/"
-  const url = "/token/fakeAccessToken"
-
   describe("configuration", () => {
     //#region Webhook mock
     let webhook: ReturnType<typeof initializeServer>
@@ -50,17 +47,17 @@ describe("server", () => {
       webhook = initializeServer(betaSeries, undefined, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
-      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, selfUrl, expect.anything(), betaSeries)
+      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "http://localhost:12000/", expect.anything(), betaSeries)
     })
 
     it("uses default url with specified port", () => {
       // act
-      webhook = initializeServer(betaSeries, { port: 123 }, true)
+      webhook = initializeServer(betaSeries, { port: 1234 }, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
       expect(plex.usePlexWebhook).toHaveBeenCalledWith(
         webhook.app,
-        "http://localhost:123/",
+        "http://localhost:1234/",
         expect.anything(),
         betaSeries,
       )
@@ -68,12 +65,14 @@ describe("server", () => {
 
     it("uses specified url", () => {
       // act
-      webhook = initializeServer(betaSeries, { url: "fakeUrl", port: 123 }, true)
+      webhook = initializeServer(betaSeries, { url: "fakeUrl", port: 1234 }, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
       expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "fakeUrl", expect.anything(), betaSeries)
     })
   })
+
+  const url = "/token/fakeAccessToken"
 
   describe("betaseries authentication", () => {
     it("redirects if no code", async () => {
@@ -220,6 +219,28 @@ describe("server", () => {
     })
 
     describe("event", () => {
+      describe("unsupported", () => {
+        it("succeeds", async () => {
+          // arrange
+          const { app } = initialize()
+          // act
+          const res = await request(app)
+            .post(url)
+            .field({
+              payload: JSON.stringify({
+                event: "fakeEvent",
+                Metadata: {
+                  type: "movie",
+                  guid: "com.plexapp.agents.imdb://fakeId\b",
+                  title: "fakeTitle",
+                },
+              }),
+            })
+          // assert
+          expect(res.status).toEqual(200)
+        })
+      })
+
       describe("scrobble", () => {
         describe("episode", () => {
           it("fails if missing title", async () => {

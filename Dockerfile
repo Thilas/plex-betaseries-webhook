@@ -1,18 +1,16 @@
-FROM node:alpine AS base
-RUN ["apk", "add", "tzdata"]
+FROM node:alpine
+
+ARG BUILD_DATE=now
+ARG VERSION=1.0.0
+
+LABEL \
+  maintainer="thilas" \
+  build_date="build-date: ${BUILD_DATE}" \
+  version="version: ${VERSION}"
+
 WORKDIR /home/node/app
-COPY LICENSE README.md package.json package-lock.json ./
-COPY config/default.yml config/custom-environment-variables.yml ./config/
+COPY . .
 RUN ["npm", "ci", "--production"]
 
-FROM base AS builder
-COPY . .
-RUN ["npm", "ci"]
-RUN ["npm", "run", "build"]
-RUN ["npm", "test"]
-
-FROM base
-LABEL maintainer="thilas"
-COPY --from=builder /home/node/app/dist ./dist/
 EXPOSE 12000
 CMD ["npm", "start"]

@@ -1,0 +1,71 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [master]
+  release:
+    types: [published]
+
+env:
+  NODE_VERSION: 14.x
+  CONTAINER_REGISTRY: docker.pkg.github.com
+  IMAGE_NAME: plex-betaseries-webhook
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Determine docker image name and version
+        run: |
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')
+          echo "IMAGE_ID:   $IMAGE_ID"
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "$GITHUB_REF" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo "VERSION:    $VERSION"
+
+          echo "::set-env name=IMAGE_ID::$IMAGE_ID"
+          echo "::set-env name=VERSION::$VERSION"
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm test
+
+      - name: SonarCloud scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarcloud-github-action@v1.4
+        with:
+          args: -Dsonar.projectVersion="${{ env.VERSION }}"
+
+      - name: Build image
+        run: docker build --build-arg BUILD_DATE="$(date --utc --rfc-3339=seconds)" --build-arg VERSION="$VERSION" --tag "$IMAGE_NAME" .
+
+      - name: Log into GitHub Container Registry
+        env:
+          CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
+          # GITHUB_ACTOR: ${{ github.actor }}
+        run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          docker tag "$IMAGE_NAME" "$IMAGE_ID/$IMAGE_NAME:$VERSION"
+          docker push "$IMAGE_ID/$IMAGE_NAME:$VERSION"
