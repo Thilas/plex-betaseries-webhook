@@ -15,6 +15,3 @@ tmp/
 
 # Docker compose file
 docker-compose.yml
-
-# Test results for Sonar
-test-report.xml

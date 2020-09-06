@@ -8,6 +8,7 @@ on:
 
 env:
   NODE_VERSION: 14.x
+  SONAR_DIRECTORY: /github/workspace
   CONTAINER_REGISTRY: docker.pkg.github.com
   IMAGE_NAME: plex-betaseries-webhook
 
@@ -15,6 +16,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -24,7 +26,7 @@ jobs:
         run: |
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')
-          echo "IMAGE_ID:   $IMAGE_ID"
+          echo "IMAGE_ID: $IMAGE_ID"
 
           # Strip git ref prefix from version
           VERSION=$(echo "$GITHUB_REF" | sed -e 's,.*/\(.*\),\1,')
@@ -32,10 +34,15 @@ jobs:
           [[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           # Use Docker `latest` tag convention
           [ "$VERSION" == "master" ] && VERSION=latest
-          echo "VERSION:    $VERSION"
+          echo "VERSION:  $VERSION"
 
           echo "::set-env name=IMAGE_ID::$IMAGE_ID"
           echo "::set-env name=VERSION::$VERSION"
+
+      - name: Create SonarCloud scanner default working directory
+        run: |
+          sudo mkdir --parents "$SONAR_DIRECTORY"
+          sudo mount --bind "$GITHUB_WORKSPACE" "$SONAR_DIRECTORY"
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v1
@@ -47,6 +54,7 @@ jobs:
       - run: npm run build
 
       - run: npm test
+        working-directory: ${{ env.SONAR_DIRECTORY }} # Align on SonarCloud scanner default working directory
 
       - name: SonarCloud scan
         env:
@@ -54,15 +62,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         uses: SonarSource/sonarcloud-github-action@v1.4
         with:
-          args: -Dsonar.projectVersion="${{ env.VERSION }}"
+          args: -Dsonar.projectVersion=${{ env.VERSION }}
 
       - name: Build image
-        run: docker build --build-arg BUILD_DATE="$(date --utc --rfc-3339=seconds)" --build-arg VERSION="$VERSION" --tag "$IMAGE_NAME" .
+        run: docker build --build-arg "BUILD_DATE=$(date --utc --rfc-3339=seconds)" --build-arg "VERSION=$VERSION" --tag "$IMAGE_NAME" .
 
       - name: Log into GitHub Container Registry
         env:
           CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
-          # GITHUB_ACTOR: ${{ github.actor }}
         run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
 
       - name: Push image to GitHub Container Registry

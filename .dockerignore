@@ -10,7 +10,6 @@ Dockerfile
 docker-compose.yml
 jest.config.js
 sonar-project.properties
-test-report.xml
 tsconfig.json
 
 !config/default.yml
