@@ -15,3 +15,6 @@ tmp/
 
 # Docker compose file
 docker-compose.yml
+
+# Jest result for Sonar
+test-report.xml
