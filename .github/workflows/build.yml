@@ -10,6 +10,7 @@ env:
   NODE_VERSION: 14.x
   SONAR_DIRECTORY: /github/workspace
   CONTAINER_REGISTRY: docker.pkg.github.com
+  DOCKERHUB_USER: thilas
   IMAGE_NAME: plex-betaseries-webhook
 
 jobs:
@@ -70,9 +71,19 @@ jobs:
       - name: Log into GitHub Container Registry
         env:
           CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
-        run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" -u "$GITHUB_ACTOR" --password-stdin
+        run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
 
       - name: Push image to GitHub Container Registry
         run: |
           docker tag "$IMAGE_NAME" "$IMAGE_ID/$IMAGE_NAME:$VERSION"
-          docker push "$IMAGE_ID/$IMAGE_NAME:$VERSION"
+          # docker push "$IMAGE_ID/$IMAGE_NAME:$VERSION"
+
+      - name: Log into Docker Hub
+        env:
+          DH_PAT: ${{ secrets.DH_PAT }}
+        run: echo "$DH_PAT" | docker login --username "$DOCKERHUB_USER" --password-stdin
+
+      - name: Push image to Docker Hub
+        run: |
+          docker tag "$IMAGE_NAME" "$DOCKERHUB_USER/$IMAGE_NAME:$VERSION"
+          # docker push "$DOCKERHUB_USER/$IMAGE_NAME:$VERSION"
