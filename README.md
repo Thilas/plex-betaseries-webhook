@@ -2,6 +2,10 @@
 
 [Plex webhook](https://support.plex.tv/articles/115002267687-webhooks/) to mark series and movies as watched on [BetaSeries](https://www.betaseries.com/).
 
+![Build](https://github.com/Thilas/plex-betaseries-webhook/workflows/Build/badge.svg)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=bugs)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=coverage)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
+
 ## Usage
 
 Here are some snippets to help get started creating a docker container.
