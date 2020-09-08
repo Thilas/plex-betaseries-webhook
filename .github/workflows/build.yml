@@ -24,6 +24,7 @@ jobs:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Determine docker image name and version
+        if: ${{ !github.base_ref }}
         run: |
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')
@@ -69,11 +70,13 @@ jobs:
         run: docker build --build-arg "BUILD_DATE=$(date --utc --rfc-3339=seconds)" --build-arg "VERSION=$VERSION" --tag "$IMAGE_NAME" .
 
       - name: Log into GitHub Container Registry
+        if: ${{ !github.base_ref }}
         env:
           CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
         run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
 
       - name: Push image to GitHub Container Registry
+        if: ${{ !github.base_ref }}
         run: |
           docker tag "$IMAGE_NAME" "$IMAGE_ID/$IMAGE_NAME:$VERSION"
           docker push "$IMAGE_ID/$IMAGE_NAME:$VERSION"
