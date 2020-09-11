@@ -156,6 +156,17 @@ describe("server", () => {
         expect(res.status).toEqual(400)
         expect(res.text).toEqual("Missing payload")
       })
+
+      it("succeeds if the user has no webhook", async () => {
+        // arrange
+        const { app } = initialize()
+        // act
+        const res = await request(app)
+          .post(url)
+          .field({ payload: JSON.stringify({ user: false }) })
+        // assert
+        expect(res.status).toEqual(200)
+      })
     })
 
     describe("metadata type", () => {
@@ -166,7 +177,7 @@ describe("server", () => {
         // act
         await request(app)
           .post(url)
-          .field({ payload: JSON.stringify({ fakeKey: "fakeValue" }) })
+          .field({ payload: JSON.stringify({ user: true, fakeKey: "fakeValue" }) })
         // assert
         expect(console.warn).toHaveBeenCalledTimes(1)
         expect(console.warn).toHaveBeenCalledWith("Unknown Plex metadata type: undefined")
@@ -179,7 +190,7 @@ describe("server", () => {
         // act
         await request(app)
           .post(url)
-          .field({ payload: JSON.stringify({ Metadata: { type: "fakeType" } }) })
+          .field({ payload: JSON.stringify({ user: true, Metadata: { type: "fakeType" } }) })
         // assert
         expect(console.warn).toHaveBeenCalledTimes(1)
         expect(console.warn).toHaveBeenCalledWith("Unknown Plex metadata type: fakeType")
@@ -193,7 +204,7 @@ describe("server", () => {
         // act
         const res = await request(app)
           .post(url)
-          .field({ payload: JSON.stringify({ event: "media.scrobble", Metadata: { type: "episode" } }) })
+          .field({ payload: JSON.stringify({ event: "media.scrobble", user: true, Metadata: { type: "episode" } }) })
         // assert
         expect(res.status).toEqual(400)
         expect(res.text).toEqual("Empty guid")
@@ -206,7 +217,11 @@ describe("server", () => {
         const res = await request(app)
           .post(url)
           .field({
-            payload: JSON.stringify({ event: "media.scrobble", Metadata: { type: "episode", guid: "fakeGuid" } }),
+            payload: JSON.stringify({
+              event: "media.scrobble",
+              user: true,
+              Metadata: { type: "episode", guid: "fakeGuid" },
+            }),
           })
         // assert
         expect(res.status).toEqual(400)
@@ -223,6 +238,7 @@ describe("server", () => {
           .field({
             payload: JSON.stringify({
               event: "media.scrobble",
+              user: true,
               Metadata: { type: "episode", guid: "com.plexapp.agents.fakeAgent://fakeId\b" },
             }),
           })
@@ -243,6 +259,7 @@ describe("server", () => {
             .field({
               payload: JSON.stringify({
                 event: "fakeEvent",
+                user: true,
                 Metadata: {
                   type: "movie",
                   guid: "com.plexapp.agents.imdb://fakeId\b",
@@ -266,6 +283,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "episode",
                     guid: "com.plexapp.agents.thetvdb://fakeId\b",
@@ -288,6 +306,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "episode",
                     guid: "com.plexapp.agents.thetvdb://fakeId\b",
@@ -310,6 +329,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "episode",
                     guid: "com.plexapp.agents.thetvdb://fakeId\b",
@@ -332,6 +352,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "episode",
                     guid: "com.plexapp.agents.imdb://fakeId\b",
@@ -349,6 +370,7 @@ describe("server", () => {
           const payload = {
             payload: JSON.stringify({
               event: "media.scrobble",
+              user: true,
               Metadata: {
                 type: "episode",
                 guid: "com.plexapp.agents.thetvdb://fakeId\b",
@@ -438,6 +460,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "movie",
                     guid: "com.plexapp.agents.imdb://fakeId\b",
@@ -458,6 +481,7 @@ describe("server", () => {
               .field({
                 payload: JSON.stringify({
                   event: "media.scrobble",
+                  user: true,
                   Metadata: {
                     type: "movie",
                     guid: "com.plexapp.agents.thetvdb://fakeId\b",
@@ -473,6 +497,7 @@ describe("server", () => {
           const imdbPayload = {
             payload: JSON.stringify({
               event: "media.scrobble",
+              user: true,
               Metadata: {
                 type: "movie",
                 guid: "com.plexapp.agents.imdb://fakeId\b",
@@ -483,6 +508,7 @@ describe("server", () => {
           const tmdbPayload = {
             payload: JSON.stringify({
               event: "media.scrobble",
+              user: true,
               Metadata: {
                 type: "movie",
                 guid: "com.plexapp.agents.themoviedb://fakeId2\b",
