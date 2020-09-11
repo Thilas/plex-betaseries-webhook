@@ -57,4 +57,7 @@ class UnknownId extends BaseId<"unknown"> {
   constructor(value: string) {
     super("unknown", value)
   }
+  toString() {
+    return this.value
+  }
 }

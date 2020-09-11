@@ -170,17 +170,16 @@ describe("server", () => {
     })
 
     describe("metadata type", () => {
-      it("warns if missing", async () => {
+      it("succeeds if missing", async () => {
         // arrange
         const { app } = initialize()
         console.warn = jest.fn()
         // act
-        await request(app)
+        const res = await request(app)
           .post(url)
-          .field({ payload: JSON.stringify({ user: true, fakeKey: "fakeValue" }) })
+          .field({ payload: JSON.stringify({ user: true }) })
         // assert
-        expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Unknown Plex metadata type: undefined")
+        expect(res.status).toEqual(200)
       })
 
       it("warns if unknown", async () => {
