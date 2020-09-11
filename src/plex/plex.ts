@@ -87,6 +87,8 @@ function getBetaSeriesMember(betaSeries: BetaSeries, accessToken?: string) {
 
 function getWebhook(payload: Payload, member: IBetaSeriesMember) {
   switch (payload.Metadata?.type) {
+    case undefined:
+      return undefined
     case "episode":
       return new EpisodeWebhook(payload, member)
     case "movie":
