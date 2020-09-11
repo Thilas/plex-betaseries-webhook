@@ -174,6 +174,23 @@ describe("betaseries", () => {
         expect(movie).toEqual(expectedMovie)
       })
 
+      it("gets a movie from its TMDb id", async () => {
+        // arrange
+        const expectedMovie = { id: 12, title: "fakeTitle", user: { status: BetaSeriesMovieStatus.none } }
+        mockAxiosInstanceForMember({
+          builder: (adapter) => {
+            adapter
+              .onGet("movies/movie", { tmdb_id: 123 }, authorizationHeader)
+              .replyOnce(200, { movie: expectedMovie })
+          },
+        })
+        const member = await betaSeries.getMember("fakeAccessToken")
+        // act
+        const movie = await member.getMovie({ id: { kind: "tmdb", value: "123" } })
+        // assert
+        expect(movie).toEqual(expectedMovie)
+      })
+
       it("updates a movie", async () => {
         // arrange
         const expectedMovie = { id: 12, title: "fakeTitle", user: { status: BetaSeriesMovieStatus.none } }
