@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios"
 import buildUrl from "build-url"
-import { ImdbId, MediaId, TvdbId } from "../plex/media/ids"
+import { ImdbId, MediaId, TmdbId, TvdbId } from "../plex/media/ids"
 import { ClientConfig, getAccessToken, initializeClient } from "./client"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./models"
 
@@ -38,7 +38,7 @@ export interface IBetaSeriesMember {
   readonly login: string
   getEpisodes(params: { id: TvdbId; season?: number; episode?: number }): Promise<BetaSeriesEpisode[] | undefined>
   markEpisodeAsWatched(params: { id: number; bulk?: boolean }): Promise<BetaSeriesEpisode | undefined>
-  getMovie(params: { id: ImdbId }): Promise<BetaSeriesMovie | undefined>
+  getMovie(params: { id: ImdbId | TmdbId }): Promise<BetaSeriesMovie | undefined>
   updateMovie(params: { id: number; state?: BetaSeriesMovieStatus }): Promise<BetaSeriesMovie | undefined>
 }
 
@@ -64,6 +64,8 @@ class BetaSeriesMember implements IBetaSeriesMember {
         return { thetvdb_id: id.value }
       case "imdb":
         return { imdb_id: id.value }
+      case "tmdb":
+        return { tmdb_id: id.value }
     }
   }
 
@@ -77,7 +79,7 @@ class BetaSeriesMember implements IBetaSeriesMember {
     return res.data.episode as BetaSeriesEpisode
   }
 
-  async getMovie(params: { id: ImdbId }) {
+  async getMovie(params: { id: ImdbId | TmdbId }) {
     const res = await this.#client.get("movies/movie", { params: this.getParams(params) })
     return res.data.movie as BetaSeriesMovie
   }

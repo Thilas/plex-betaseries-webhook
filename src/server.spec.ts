@@ -456,7 +456,7 @@ describe("server", () => {
             expect(res.text).toEqual("Unsupported movie id for fakeTitle: fakeId@tvdb")
           })
 
-          const payload = {
+          const imdbPayload = {
             payload: JSON.stringify({
               event: "media.scrobble",
               Metadata: {
@@ -466,13 +466,23 @@ describe("server", () => {
               },
             }),
           }
+          const tmdbPayload = {
+            payload: JSON.stringify({
+              event: "media.scrobble",
+              Metadata: {
+                type: "movie",
+                guid: "com.plexapp.agents.themoviedb://fakeId2\b",
+                title: "fakeTitle2",
+              },
+            }),
+          }
 
           it("fails if not found", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
             mbMock.setup((i) => i.getMovie(It.IsAny())).returns(Promise.resolve(undefined))
             // act
-            const res = await request(app).post(url).field(payload)
+            const res = await request(app).post(url).field(imdbPayload)
             // assert
             expect(res.status).toEqual(400)
             expect(res.text).toEqual("No movie found for: fakeTitle (fakeId@imdb)")
@@ -485,7 +495,7 @@ describe("server", () => {
               .setup((i) => i.getMovie(It.IsAny()))
               .returns(Promise.resolve({ user: { status: BetaSeriesMovieStatus.seen } } as BetaSeriesMovie))
             // act
-            const res = await request(app).post(url).field(payload)
+            const res = await request(app).post(url).field(tmdbPayload)
             // assert
             expect(res.status).toEqual(200)
           })
@@ -503,7 +513,7 @@ describe("server", () => {
               .setup((i) => i.updateMovie(It.IsAny()))
               .returns(Promise.resolve({ user: { status: BetaSeriesMovieStatus.none } } as BetaSeriesMovie))
             // act
-            const res = await request(app).post(url).field(payload)
+            const res = await request(app).post(url).field(imdbPayload)
             // assert
             expect(res.status).toEqual(400)
             expect(res.text).toEqual("Movie not marked as watched for: fakeTitle (fakeId@imdb)")
@@ -517,7 +527,7 @@ describe("server", () => {
               .setup((i) => i.updateMovie(It.IsAny()))
               .returns(Promise.resolve({ user: { status: BetaSeriesMovieStatus.seen } } as BetaSeriesMovie))
             // act
-            const res = await request(app).post(url).field(payload)
+            const res = await request(app).post(url).field(imdbPayload)
             // assert
             expect(res.status).toEqual(200)
           })

@@ -16,6 +16,8 @@ export function getMediaId(guid?: string) {
       return new TvdbId(match.groups.id)
     case "imdb":
       return new ImdbId(match.groups.id)
+    case "themoviedb":
+      return new TmdbId(match.groups.id)
     default:
       console.warn(`Unknown Plex agent: ${match.groups.agent}`)
       return new UnknownId(guid)
@@ -42,6 +44,12 @@ export class TvdbId extends BaseId<"tvdb"> {
 export class ImdbId extends BaseId<"imdb"> {
   constructor(value: string) {
     super("imdb", value)
+  }
+}
+
+export class TmdbId extends BaseId<"tmdb"> {
+  constructor(value: string) {
+    super("tmdb", value)
   }
 }
 
