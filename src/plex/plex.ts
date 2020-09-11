@@ -42,9 +42,11 @@ export function usePlexWebhook(
     .post(multer(uploadOptions).any(), async (req, res, next) => {
       try {
         const payload = getPayload(req.body?.payload)
-        const member = await getBetaSeriesMember(betaSeries, req.params.accessToken)
-        const webhook = getWebhook(payload, member)
-        await webhook?.processEvent(payload.event)
+        if (payload.user) {
+          const member = await getBetaSeriesMember(betaSeries, req.params.accessToken)
+          const webhook = getWebhook(payload, member)
+          await webhook?.processEvent(payload.event)
+        }
         res.sendStatus(200)
       } catch (error) {
         next(error)
