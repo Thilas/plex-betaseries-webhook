@@ -37,6 +37,7 @@ describe("server", () => {
         server.close()
         done()
       })
+      if (!webhook.server) done()
     })
     //#endregion
 
@@ -47,12 +48,17 @@ describe("server", () => {
       webhook = initializeServer(betaSeries, undefined, true)
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
-      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "http://localhost:12000/", expect.anything(), betaSeries)
+      expect(plex.usePlexWebhook).toHaveBeenCalledWith(
+        webhook.app,
+        "http://localhost:12000/",
+        expect.anything(),
+        betaSeries,
+      )
     })
 
     it("uses default url with specified port", () => {
       // act
-      webhook = initializeServer(betaSeries, { port: 1234 }, true)
+      webhook = initializeServer(betaSeries, { port: 1234 })
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
       expect(plex.usePlexWebhook).toHaveBeenCalledWith(
@@ -65,10 +71,18 @@ describe("server", () => {
 
     it("uses specified url", () => {
       // act
-      webhook = initializeServer(betaSeries, { url: "fakeUrl", port: 1234 }, true)
+      webhook = initializeServer(betaSeries, { url: "fakeUrl", port: 80 })
       // assert
       expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
       expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "fakeUrl", expect.anything(), betaSeries)
+    })
+
+    it("uses port 80", () => {
+      // act
+      webhook = initializeServer(betaSeries, { port: 80 })
+      // assert
+      expect(plex.usePlexWebhook).toHaveBeenCalledTimes(1)
+      expect(plex.usePlexWebhook).toHaveBeenCalledWith(webhook.app, "http://localhost/", expect.anything(), betaSeries)
     })
   })
 
