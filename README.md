@@ -5,7 +5,7 @@
 [![Build](https://github.com/Thilas/plex-betaseries-webhook/workflows/Build/badge.svg)](https://github.com/Thilas/plex-betaseries-webhook/actions?query=workflow%3ABuild)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=bugs)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=coverage)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
-[![Docker Hub](https://img.shields.io/docker/v/thilas/plex-betaseries-webhook?logo=docker)](https://registry.hub.docker.com/r/thilas/plex-betaseries-webhook)
+[![Docker Hub](https://img.shields.io/docker/v/thilas/plex-betaseries-webhook/latest?logo=docker)](https://registry.hub.docker.com/r/thilas/plex-betaseries-webhook)
 
 ## Usage
 
