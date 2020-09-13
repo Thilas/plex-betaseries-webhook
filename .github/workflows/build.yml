@@ -23,23 +23,16 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Determine docker image name and version
+      - name: Bump version
         if: ${{ !github.base_ref }}
         run: |
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')
-          echo "IMAGE_ID: $IMAGE_ID"
-
           # Strip git ref prefix from version
           VERSION=$(echo "$GITHUB_REF" | sed -e 's,.*/\(.*\),\1,')
           # Strip "v" prefix from tag name
           [[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-          echo "VERSION:  $VERSION"
-
-          echo "::set-env name=IMAGE_ID::$IMAGE_ID"
+          echo "VERSION: $VERSION"
           echo "::set-env name=VERSION::$VERSION"
+          npm --no-git-tag-version version "$VERSION"
 
       - name: Create SonarCloud scanner default working directory
         run: |
@@ -78,10 +71,12 @@ jobs:
       - name: Push image to GitHub Container Registry
         if: ${{ !github.base_ref }}
         run: |
-          docker tag "$IMAGE_NAME" "$IMAGE_ID/$IMAGE_NAME:$VERSION"
-          docker push "$IMAGE_ID/$IMAGE_NAME:$VERSION"
-          docker tag "$IMAGE_NAME" "$IMAGE_ID/$IMAGE_NAME:latest"
-          docker push "$IMAGE_ID/$IMAGE_NAME:latest"
+          # Change all uppercase to lowercase
+          IMAGE_ID="$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')/$IMAGE_NAME"
+          docker tag "$IMAGE_NAME" "$IMAGE_ID:$VERSION"
+          docker push "$IMAGE_ID:$VERSION"
+          docker tag "$IMAGE_NAME" "$IMAGE_ID:latest"
+          docker push "$IMAGE_ID:latest"
 
       - name: Log into Docker Hub
         if: ${{ !github.base_ref }}
@@ -92,7 +87,8 @@ jobs:
       - name: Push image to Docker Hub
         if: ${{ !github.base_ref }}
         run: |
-          docker tag "$IMAGE_NAME" "$DOCKERHUB_USER/$IMAGE_NAME:$VERSION"
-          docker push "$DOCKERHUB_USER/$IMAGE_NAME:$VERSION"
-          docker tag "$IMAGE_NAME" "$DOCKERHUB_USER/$IMAGE_NAME:latest"
-          docker push "$DOCKERHUB_USER/$IMAGE_NAME:latest"
+          IMAGE_ID="$DOCKERHUB_USER/$IMAGE_NAME"
+          docker tag "$IMAGE_NAME" "$IMAGE_ID:$VERSION"
+          docker push "$IMAGE_ID:$VERSION"
+          docker tag "$IMAGE_NAME" "$IMAGE_ID:latest"
+          docker push "$IMAGE_ID:latest"
