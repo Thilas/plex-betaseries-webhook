@@ -5,25 +5,25 @@ import { Payload } from "../payload"
 import { Webhook } from "./webhook"
 
 export class EpisodeWebhook extends Webhook<PlexEpisode> {
-  constructor(payload: Payload, member: IBetaSeriesMember) {
+  constructor(payload: Payload) {
     const media = PlexEpisode.create(payload)
-    super(payload, media, member)
+    super(payload, media)
   }
 
-  async scrobble() {
-    const episode = await this.getEpisode()
+  async scrobble(member: IBetaSeriesMember) {
+    const episode = await this.getEpisode(member)
     if (episode.user.seen) {
       return false
     }
-    const result = await this.markEpisodeAsWatched(episode, { bulk: false })
+    const result = await this.markEpisodeAsWatched(member, episode, { bulk: false })
     if (!result.user.seen) {
       throw `Episode not marked as watched for: ${this.media}`
     }
     return true
   }
 
-  private async getEpisode() {
-    const results = await this.member.getEpisodes({
+  private async getEpisode(member: IBetaSeriesMember) {
+    const results = await member.getEpisodes({
       id: this.media.id,
       season: this.media.season,
       episode: this.media.episode,
@@ -37,8 +37,12 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
     return results[0]
   }
 
-  private async markEpisodeAsWatched(episode: BetaSeriesEpisode, params: { bulk?: boolean }) {
-    const result = await this.member.markEpisodeAsWatched({ id: episode.id, ...params })
+  private async markEpisodeAsWatched(
+    member: IBetaSeriesMember,
+    episode: BetaSeriesEpisode,
+    params: { bulk?: boolean },
+  ) {
+    const result = await member.markEpisodeAsWatched({ id: episode.id, ...params })
     if (!result) {
       throw `No episode found for: ${this.media}`
     }

@@ -22,13 +22,11 @@ export async function getAccessToken(config: ClientConfig, selfUrl: string, code
     code: code,
   })
   const accessToken = res.data.access_token as string
-  console.log("Checking new access token...")
   const { login } = await initializeClientUsingAccessToken(config, accessToken)
   return { accessToken, login }
 }
 
 export async function initializeClient(config: ClientConfig, accessToken?: string) {
-  console.log("Checking access token...")
   return await initializeClientUsingAccessToken(config, accessToken)
 }
 

@@ -1,7 +1,7 @@
 import buildUrl from "build-url"
 import express, { Response } from "express"
 import multer from "multer"
-import { BetaSeries, IBetaSeriesMember } from "../betaseries/betaseries"
+import { BetaSeries } from "../betaseries/betaseries"
 import { Payload } from "./payload"
 import { EpisodeWebhook } from "./webhooks/episode"
 import { MovieWebhook } from "./webhooks/movie"
@@ -43,9 +43,9 @@ export function usePlexWebhook(
       try {
         const payload = getPayload(req.body?.payload)
         if (payload.user) {
-          const member = await getBetaSeriesMember(betaSeries, req.params.accessToken)
-          const webhook = getWebhook(payload, member)
-          await webhook?.processEvent(payload.event)
+          const memberFactory = () => getBetaSeriesMember(betaSeries, req.params.accessToken)
+          const webhook = getWebhook(payload)
+          await webhook?.processEvent(payload.event, memberFactory)
         }
         res.sendStatus(200)
       } catch (error) {
@@ -85,14 +85,15 @@ function getBetaSeriesMember(betaSeries: BetaSeries, accessToken?: string) {
   return betaSeries.getMember(accessToken)
 }
 
-function getWebhook(payload: Payload, member: IBetaSeriesMember) {
+function getWebhook(payload: Payload) {
   switch (payload.Metadata?.type) {
-    case undefined:
-      return undefined
     case "episode":
-      return new EpisodeWebhook(payload, member)
+      return new EpisodeWebhook(payload)
     case "movie":
-      return new MovieWebhook(payload, member)
+      return new MovieWebhook(payload)
+    case undefined:
+    case "track":
+      return undefined
     default:
       console.warn(`Unknown Plex metadata type: ${payload.Metadata?.type}`)
   }
