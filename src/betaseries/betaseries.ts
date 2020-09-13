@@ -24,12 +24,13 @@ export class BetaSeries {
   async getAccessToken(selfUrl: string, code: string) {
     console.log("Requesting a new access token...")
     const { accessToken, login } = await getAccessToken(this.config.client, selfUrl, code)
-    console.log(`New access token is ready for ${login}`)
+    console.log(`New access token issued for ${login}`)
     return { accessToken, login }
   }
 
   async getMember(accessToken: string) {
     const { client, login } = await initializeClient(this.config.client, accessToken)
+    console.log(`Access token of ${login} checked`)
     return new BetaSeriesMember(client, login) as IBetaSeriesMember
   }
 }
