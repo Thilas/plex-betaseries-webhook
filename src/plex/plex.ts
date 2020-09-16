@@ -92,6 +92,7 @@ function getWebhook(payload: Payload) {
     case "movie":
       return new MovieWebhook(payload)
     case undefined:
+    case "show":
     case "track":
       return undefined
     default:
