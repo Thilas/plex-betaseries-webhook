@@ -31,7 +31,7 @@ jobs:
           # Strip "v" prefix from tag name
           [[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           echo "VERSION: $VERSION"
-          echo "::set-env name=VERSION::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           npm --no-git-tag-version version "$VERSION"
 
       - name: Create SonarCloud scanner default working directory
