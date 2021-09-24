@@ -1,15 +1,16 @@
 import { Payload } from "../payload"
-import { getMediaId, ImdbId, isSupportedMediaId, TmdbId } from "./ids"
+import { formatMediaIds, getMediaIds, getSupportedMediaId, ImdbId, TmdbId } from "./ids"
 
 export class PlexMovie {
   static create(payload: Payload) {
-    const id = getMediaId(payload.Metadata?.guid)
+    const ids = getMediaIds(payload.Metadata?.Guid)
+    const id = getSupportedMediaId(ids, ImdbId) ?? getSupportedMediaId(ids, TmdbId)
     const title = payload.Metadata?.title
+    if (!id) {
+      throw `Unsupported movie id for ${title}: ${formatMediaIds(ids)}`
+    }
     if (!title) {
       throw `Invalid movie: ${title} (${id})`
-    }
-    if (!isSupportedMediaId(id, ImdbId) && !isSupportedMediaId(id, TmdbId)) {
-      throw `Unsupported movie id for ${title}: ${id}`
     }
     return new PlexMovie(id, title)
   }

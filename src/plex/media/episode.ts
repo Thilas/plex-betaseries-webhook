@@ -1,17 +1,18 @@
 import { Payload } from "../payload"
-import { getMediaId, isSupportedMediaId, TvdbId } from "./ids"
+import { formatMediaIds, getMediaIds, getSupportedMediaId, TvdbId } from "./ids"
 
 export class PlexEpisode {
   static create(payload: Payload) {
-    const id = getMediaId(payload.Metadata?.guid)
+    const ids = getMediaIds(payload.Metadata?.Guid)
+    const id = getSupportedMediaId(ids, TvdbId)
     const title = payload.Metadata?.grandparentTitle
     const season = payload.Metadata?.parentIndex
     const episode = payload.Metadata?.index
-    if (!title || !season || !episode) {
-      throw `Invalid episode: ${title} (${id}) ${formatEpisode(season, episode)}`
+    if (!id) {
+      throw `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(ids)}`
     }
-    if (!isSupportedMediaId(id, TvdbId)) {
-      throw `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${id}`
+    if (!title || !season || !episode) {
+      throw `Invalid episode: ${title} ${formatEpisode(season, episode)} (${id})`
     }
     return new PlexEpisode(id, title, season, episode)
   }
@@ -19,7 +20,7 @@ export class PlexEpisode {
   private constructor(readonly id: TvdbId, readonly title: string, readonly season: number, readonly episode: number) {}
 
   toString() {
-    return `${this.title} (${this.id}) ${formatEpisode(this.season, this.episode)}`
+    return `${this.title} ${formatEpisode(this.season, this.episode)} (${this.id})`
   }
 }
 

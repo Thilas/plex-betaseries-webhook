@@ -31,13 +31,10 @@ describe("server", () => {
     beforeEach(() => {
       jest.spyOn(plex, "usePlexWebhook")
     })
-    afterEach((done) => {
+    afterEach(async () => {
       jest.restoreAllMocks()
-      webhook.server?.then((server) => {
-        server.close()
-        done()
-      })
-      if (!webhook.server) done()
+      const server = await webhook.server
+      server?.close()
     })
     //#endregion
 
@@ -206,6 +203,24 @@ describe("server", () => {
           .field({ payload: JSON.stringify({ event: "media.scrobble", user: true, Metadata: { type: "episode" } }) })
         // assert
         expect(res.status).toEqual(400)
+        expect(res.text).toEqual("No guids")
+      })
+
+      it("fails if empty", async () => {
+        // arrange
+        const { app } = initialize()
+        // act
+        const res = await request(app)
+          .post(url)
+          .field({
+            payload: JSON.stringify({
+              event: "media.scrobble",
+              user: true,
+              Metadata: { type: "episode", Guid: [undefined] }
+            })
+          })
+        // assert
+        expect(res.status).toEqual(400)
         expect(res.text).toEqual("Empty guid")
       })
 
@@ -219,7 +234,7 @@ describe("server", () => {
             payload: JSON.stringify({
               event: "media.scrobble",
               user: true,
-              Metadata: { type: "episode", guid: "fakeGuid" },
+              Metadata: { type: "episode", Guid: [{ id: "fakeGuid" }] },
             }),
           })
         // assert
@@ -238,7 +253,7 @@ describe("server", () => {
             payload: JSON.stringify({
               event: "media.scrobble",
               user: true,
-              Metadata: { type: "episode", guid: "com.plexapp.agents.fakeAgent://fakeId\b" },
+              Metadata: { type: "episode", Guid: [{ id: "fakeAgent://fakeId\b" }] },
             }),
           })
         // assert
@@ -261,7 +276,7 @@ describe("server", () => {
                 user: true,
                 Metadata: {
                   type: "movie",
-                  guid: "com.plexapp.agents.imdb://fakeId\b",
+                  Guid: [{ id: "imdb://fakeId\b" }],
                   title: "fakeTitle",
                 },
               }),
@@ -285,7 +300,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    guid: "com.plexapp.agents.thetvdb://fakeId\b",
+                    Guid: [{ id: "tvdb://fakeId\b" }],
                     parentIndex: 1,
                     index: 2,
                   },
@@ -293,7 +308,7 @@ describe("server", () => {
               })
             // assert
             expect(res.status).toEqual(400)
-            expect(res.text).toEqual("Invalid episode: undefined (fakeId@tvdb) S01E02")
+            expect(res.text).toEqual("Invalid episode: undefined S01E02 (fakeId@tvdb)")
           })
 
           it("fails if missing season", async () => {
@@ -308,7 +323,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    guid: "com.plexapp.agents.thetvdb://fakeId\b",
+                    Guid: [{ id: "tvdb://fakeId\b" }],
                     grandparentTitle: "fakeTitle",
                     index: 2,
                   },
@@ -316,7 +331,7 @@ describe("server", () => {
               })
             // assert
             expect(res.status).toEqual(400)
-            expect(res.text).toEqual("Invalid episode: fakeTitle (fakeId@tvdb) S??E02")
+            expect(res.text).toEqual("Invalid episode: fakeTitle S??E02 (fakeId@tvdb)")
           })
 
           it("fails if missing episode", async () => {
@@ -331,7 +346,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    guid: "com.plexapp.agents.thetvdb://fakeId\b",
+                    Guid: [{ id: "tvdb://fakeId\b" }],
                     grandparentTitle: "fakeTitle",
                     parentIndex: 1,
                   },
@@ -339,7 +354,7 @@ describe("server", () => {
               })
             // assert
             expect(res.status).toEqual(400)
-            expect(res.text).toEqual("Invalid episode: fakeTitle (fakeId@tvdb) S01E??")
+            expect(res.text).toEqual("Invalid episode: fakeTitle S01E?? (fakeId@tvdb)")
           })
 
           it("fails if unsupported id", async () => {
@@ -354,7 +369,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    guid: "com.plexapp.agents.imdb://fakeId\b",
+                    Guid: [{ id: "imdb://fakeId\b" }],
                     grandparentTitle: "fakeTitle",
                     parentIndex: 1,
                     index: 2,
@@ -372,7 +387,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "episode",
-                guid: "com.plexapp.agents.thetvdb://fakeId\b",
+                Guid: [{ id: "tvdb://fakeId\b" }],
                 grandparentTitle: "fakeTitle",
                 parentIndex: 1,
                 index: 2,
@@ -383,33 +398,20 @@ describe("server", () => {
           it("fails if not found", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
-            mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([]))
+            mbMock.setup((i) => i.getEpisode(It.IsAny())).returns(Promise.resolve(undefined))
             // act
             const res = await request(app).post(url).field(payload)
             // assert
             expect(res.status).toEqual(400)
-            expect(res.text).toEqual("No episode found for: fakeTitle (fakeId@tvdb) S01E02")
-          })
-
-          it("fails if found multiple times", async () => {
-            // arrange
-            const { app, memberMock: mbMock } = initialize()
-            mbMock
-              .setup((i) => i.getEpisodes(It.IsAny()))
-              .returns(Promise.resolve([{} as BetaSeriesEpisode, {} as BetaSeriesEpisode]))
-            // act
-            const res = await request(app).post(url).field(payload)
-            // assert
-            expect(res.status).toEqual(400)
-            expect(res.text).toEqual("Multiple episodes found for: fakeTitle (fakeId@tvdb) S01E02")
+            expect(res.text).toEqual("No episode found for: fakeTitle S01E02 (fakeId@tvdb)")
           })
 
           it("succeeds if already scrobbled", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
             mbMock
-              .setup((i) => i.getEpisodes(It.IsAny()))
-              .returns(Promise.resolve([{ user: { seen: true } } as BetaSeriesEpisode]))
+              .setup((i) => i.getEpisode(It.IsAny()))
+              .returns(Promise.resolve({ user: { seen: true } } as BetaSeriesEpisode))
             // act
             const res = await request(app).post(url).field(payload)
             // assert
@@ -424,7 +426,7 @@ describe("server", () => {
           it("fails if unable to scrobble", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
-            mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([betaSeriesEpisode]))
+            mbMock.setup((i) => i.getEpisode(It.IsAny())).returns(Promise.resolve(betaSeriesEpisode))
             mbMock
               .setup((i) => i.markEpisodeAsWatched(It.IsAny()))
               .returns(Promise.resolve({ user: { seen: false } } as BetaSeriesEpisode))
@@ -432,13 +434,13 @@ describe("server", () => {
             const res = await request(app).post(url).field(payload)
             // assert
             expect(res.status).toEqual(400)
-            expect(res.text).toEqual("Episode not marked as watched for: fakeTitle (fakeId@tvdb) S01E02")
+            expect(res.text).toEqual("Episode not marked as watched for: fakeTitle S01E02 (fakeId@tvdb)")
           })
 
           it("succeeds if not already scrobbled", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
-            mbMock.setup((i) => i.getEpisodes(It.IsAny())).returns(Promise.resolve([betaSeriesEpisode]))
+            mbMock.setup((i) => i.getEpisode(It.IsAny())).returns(Promise.resolve(betaSeriesEpisode))
             mbMock
               .setup((i) => i.markEpisodeAsWatched(It.IsAny()))
               .returns(Promise.resolve({ user: { seen: true } } as BetaSeriesEpisode))
@@ -462,7 +464,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "movie",
-                    guid: "com.plexapp.agents.imdb://fakeId\b",
+                    Guid: [{ id: "imdb://fakeId\b" }],
                   },
                 }),
               })
@@ -483,7 +485,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "movie",
-                    guid: "com.plexapp.agents.thetvdb://fakeId\b",
+                    Guid: [{ id: "tvdb://fakeId\b" }],
                     title: "fakeTitle",
                   },
                 }),
@@ -499,7 +501,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "movie",
-                guid: "com.plexapp.agents.imdb://fakeId\b",
+                Guid: [{ id: "imdb://fakeId\b" }],
                 title: "fakeTitle",
               },
             }),
@@ -510,7 +512,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "movie",
-                guid: "com.plexapp.agents.themoviedb://fakeId2\b",
+                Guid: [{ id: "tmdb://fakeId2\b" }],
                 title: "fakeTitle2",
               },
             }),

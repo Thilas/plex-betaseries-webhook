@@ -1,22 +1,31 @@
 import { Constructor } from "../../utils"
+import { PayloadGuid } from "../payload"
 
 type NonMediaId = UnknownId | undefined
 export type MediaId = Exclude<ReturnType<typeof getMediaId>, NonMediaId>
 
-export function getMediaId(guid?: string) {
+export function getMediaIds(guids?: PayloadGuid[]) {
+  if (!guids) {
+    throw `No guids`
+  }
+  const result = guids.map(guid => getMediaId(guid?.id))
+  return result
+}
+
+function getMediaId(guid?: string) {
   if (!guid) {
     throw `Empty guid`
   }
-  const match = /^com\.plexapp\.agents\.(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
+  const match = /^(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
   if (!match?.groups) {
     throw `Invalid guid: ${guid}`
   }
   switch (match.groups.agent) {
-    case "thetvdb":
+    case "tvdb":
       return new TvdbId(match.groups.id)
     case "imdb":
       return new ImdbId(match.groups.id)
-    case "themoviedb":
+    case "tmdb":
       return new TmdbId(match.groups.id)
     default:
       console.warn(`Unknown Plex agent: ${match.groups.agent}`)
@@ -24,8 +33,15 @@ export function getMediaId(guid?: string) {
   }
 }
 
-export function isSupportedMediaId<T extends MediaId>(value: MediaId | NonMediaId, type: Constructor<T>): value is T {
-  return value instanceof type
+export function getSupportedMediaId<T extends MediaId>(values: (MediaId | NonMediaId)[], type: Constructor<T>): T | undefined {
+  for (const value of values) {
+    if (value instanceof type) return value
+  }
+  return undefined
+}
+
+export function formatMediaIds(values: (MediaId | NonMediaId)[]) {
+  return values.join(", ")
 }
 
 abstract class BaseId<T> {

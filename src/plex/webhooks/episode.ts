@@ -23,18 +23,11 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
   }
 
   private async getEpisode(member: IBetaSeriesMember) {
-    const results = await member.getEpisodes({
-      id: this.media.id,
-      season: this.media.season,
-      episode: this.media.episode,
-    })
-    if (!results?.length) {
+    const result = await member.getEpisode({ id: this.media.id })
+    if (!result) {
       throw `No episode found for: ${this.media}`
     }
-    if (results.length > 1) {
-      throw `Multiple episodes found for: ${this.media}`
-    }
-    return results[0]
+    return result
   }
 
   private async markEpisodeAsWatched(
