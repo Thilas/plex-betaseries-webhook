@@ -32,7 +32,7 @@ export async function initializeClient(config: ClientConfig, accessToken?: strin
 
 async function initializeClientUsingAccessToken(config: ClientConfig, accessToken?: string) {
   if (!accessToken) {
-    throw "Empty access token"
+    throw new Error("Empty access token")
   }
   const client = getClient(config, accessToken)
   const res = await client.get("members/infos")

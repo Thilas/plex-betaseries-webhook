@@ -7,10 +7,10 @@ export class PlexMovie {
     const id = getSupportedMediaId(ids, ImdbId) ?? getSupportedMediaId(ids, TmdbId)
     const title = payload.Metadata?.title
     if (!id) {
-      throw `Unsupported movie id for ${title}: ${formatMediaIds(ids)}`
+      throw new Error(`Unsupported movie id for ${title}: ${formatMediaIds(ids)}`)
     }
     if (!title) {
-      throw `Invalid movie: ${title} (${id})`
+      throw new Error(`Invalid movie: ${title} (${id})`)
     }
     return new PlexMovie(id, title)
   }

@@ -17,7 +17,7 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
     }
     const result = await this.markEpisodeAsWatched(member, episode, { bulk: false })
     if (!result.user.seen) {
-      throw `Episode not marked as watched for: ${this.media}`
+      throw new Error(`Episode not marked as watched for: ${this.media}`)
     }
     return true
   }
@@ -25,7 +25,7 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
   private async getEpisode(member: IBetaSeriesMember) {
     const result = await member.getEpisode({ id: this.media.id })
     if (!result) {
-      throw `No episode found for: ${this.media}`
+      throw new Error(`No episode found for: ${this.media}`)
     }
     return result
   }
@@ -37,7 +37,7 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
   ) {
     const result = await member.markEpisodeAsWatched({ id: episode.id, ...params })
     if (!result) {
-      throw `No episode found for: ${this.media}`
+      throw new Error(`No episode found for: ${this.media}`)
     }
     return result
   }

@@ -6,19 +6,18 @@ export type MediaId = Exclude<ReturnType<typeof getMediaId>, NonMediaId>
 
 export function getMediaIds(guids?: PayloadGuid[]) {
   if (!guids) {
-    throw `No guids`
+    throw new Error(`No guids`)
   }
-  const result = guids.map(guid => getMediaId(guid?.id))
-  return result
+  return guids.map(guid => getMediaId(guid?.id))
 }
 
 function getMediaId(guid?: string) {
   if (!guid) {
-    throw `Empty guid`
+    throw new Error(`Empty guid`)
   }
   const match = /^(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
   if (!match?.groups) {
-    throw `Invalid guid: ${guid}`
+    throw new Error(`Invalid guid: ${guid}`)
   }
   switch (match.groups.agent) {
     case "tvdb":
