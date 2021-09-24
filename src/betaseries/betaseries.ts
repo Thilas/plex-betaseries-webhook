@@ -37,7 +37,7 @@ export class BetaSeries {
 
 export interface IBetaSeriesMember {
   readonly login: string
-  getEpisodes(params: { id: TvdbId; season?: number; episode?: number }): Promise<BetaSeriesEpisode[] | undefined>
+  getEpisode(params: { id: TvdbId }): Promise<BetaSeriesEpisode | undefined>
   markEpisodeAsWatched(params: { id: number; bulk?: boolean }): Promise<BetaSeriesEpisode | undefined>
   getMovie(params: { id: ImdbId | TmdbId }): Promise<BetaSeriesMovie | undefined>
   updateMovie(params: { id: number; state?: BetaSeriesMovieStatus }): Promise<BetaSeriesMovie | undefined>
@@ -70,9 +70,9 @@ class BetaSeriesMember implements IBetaSeriesMember {
     }
   }
 
-  async getEpisodes(params: { id: TvdbId; season?: number; episode?: number }) {
-    const res = await this.#client.get("shows/episodes", { params: this.getParams(params) })
-    return res.data.episodes as BetaSeriesEpisode[]
+  async getEpisode(params: { id: TvdbId }) {
+    const res = await this.#client.get("episodes/display", { params: this.getParams(params) })
+    return res.data.episode as BetaSeriesEpisode
   }
 
   async markEpisodeAsWatched(params: { id: number; bulk?: boolean }) {

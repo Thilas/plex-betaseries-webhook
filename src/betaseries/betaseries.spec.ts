@@ -119,23 +119,22 @@ describe("betaseries", () => {
   })
 
   describe("members", () => {
-    describe("episodes", () => {
-      it("gets episodes from its TheTVDB id", async () => {
+    describe("episode", () => {
+      it("gets episode from its TheTVDB id", async () => {
         // arrange
-        const expectedEpisode = { id: 12, title: "fakeTitle", season: 4, episode: 5, user: { seen: false } }
+        const expectedEpisode = { id: 12, title: "fakeTitle", user: { seen: false } }
         mockAxiosInstanceForMember({
           builder: (adapter) => {
             adapter
-              .onGet("shows/episodes", { thetvdb_id: 123, season: 4, episode: 5 }, authorizationHeader)
-              .replyOnce(200, { episodes: [expectedEpisode] })
+              .onGet("episodes/display", { thetvdb_id: 123 }, authorizationHeader)
+              .replyOnce(200, { episode: expectedEpisode })
           },
         })
         const member = await betaSeries.getMember("fakeAccessToken")
         // act
-        const episodes = await member.getEpisodes({ id: { kind: "tvdb", value: "123" }, season: 4, episode: 5 })
+        const episode = await member.getEpisode({ id: { kind: "tvdb", value: "123" } })
         // assert
-        expect(episodes).toHaveLength(1)
-        expect(episodes).toContainEqual(expectedEpisode)
+        expect(episode).toEqual(expectedEpisode)
       })
 
       it("marks an episode as watched", async () => {

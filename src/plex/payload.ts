@@ -27,10 +27,14 @@ export interface PayloadPlayer {
 }
 
 export interface PayloadMetadata {
-  guid: string
+  Guid: PayloadGuid[]
   type: string
   title: string
   grandparentTitle: string
   index: number
   parentIndex: number
+}
+
+export interface PayloadGuid {
+  id: string
 }
