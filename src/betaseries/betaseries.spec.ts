@@ -93,7 +93,7 @@ describe("betaseries", () => {
       // act
       const memberPromise = betaSeries.getMember("")
       // assert
-      await expect(memberPromise).rejects.toEqual("Empty access token")
+      await expect(memberPromise).rejects.toThrow("Empty access token")
     })
 
     it("fails if invalid access token", async () => {

@@ -9,10 +9,10 @@ export class PlexEpisode {
     const season = payload.Metadata?.parentIndex
     const episode = payload.Metadata?.index
     if (!id) {
-      throw `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(ids)}`
+      throw new Error(`Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(ids)}`)
     }
     if (!title || !season || !episode) {
-      throw `Invalid episode: ${title} ${formatEpisode(season, episode)} (${id})`
+      throw new Error(`Invalid episode: ${title} ${formatEpisode(season, episode)} (${id})`)
     }
     return new PlexEpisode(id, title, season, episode)
   }

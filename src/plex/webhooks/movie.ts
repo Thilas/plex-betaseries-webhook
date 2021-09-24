@@ -17,7 +17,7 @@ export class MovieWebhook extends Webhook<PlexMovie> {
     }
     const result = await this.updateMovie(member, movie, { state: BetaSeriesMovieStatus.seen })
     if (result.user.status !== BetaSeriesMovieStatus.seen) {
-      throw `Movie not marked as watched for: ${this.media}`
+      throw new Error(`Movie not marked as watched for: ${this.media}`)
     }
     return true
   }
@@ -25,7 +25,7 @@ export class MovieWebhook extends Webhook<PlexMovie> {
   private async getMovie(member: IBetaSeriesMember) {
     const result = await member.getMovie({ id: this.media.id })
     if (!result) {
-      throw `No movie found for: ${this.media}`
+      throw new Error(`No movie found for: ${this.media}`)
     }
     return result
   }
@@ -37,7 +37,7 @@ export class MovieWebhook extends Webhook<PlexMovie> {
   ) {
     const result = await member.updateMovie({ id: movie.id, ...params })
     if (!result) {
-      throw `No movie found for: ${this.media}`
+      throw new Error(`No movie found for: ${this.media}`)
     }
     return result
   }

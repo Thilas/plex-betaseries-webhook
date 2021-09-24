@@ -73,14 +73,14 @@ function displayAccessToken(res: Response, selfUrl: string, accessToken: string,
 
 function getPayload(data?: string): Payload {
   if (!data) {
-    throw "Missing payload"
+    throw new Error("Missing payload")
   }
   return JSON.parse(data)
 }
 
 function getBetaSeriesMember(betaSeries: BetaSeries, accessToken?: string) {
   if (!accessToken) {
-    throw "A single accessToken query parameter is required"
+    throw new Error("A single accessToken query parameter is required")
   }
   return betaSeries.getMember(accessToken)
 }
