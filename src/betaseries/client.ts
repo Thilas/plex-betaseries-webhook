@@ -27,7 +27,7 @@ export async function getAccessToken(config: ClientConfig, selfUrl: string, code
 }
 
 export async function initializeClient(config: ClientConfig, accessToken?: string) {
-  return await initializeClientUsingAccessToken(config, accessToken)
+  return initializeClientUsingAccessToken(config, accessToken)
 }
 
 async function initializeClientUsingAccessToken(config: ClientConfig, accessToken?: string) {
