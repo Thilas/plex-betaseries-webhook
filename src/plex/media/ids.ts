@@ -6,10 +6,9 @@ export function getMediaIds(guids?: PayloadGuid[]) {
   if (!guids) {
     throw new Error(`No guids`)
   }
-  const ids = guids
+  return guids
     .map(guid => getMediaId(guid?.id))
     .filter((id): id is MediaId => !!id)
-  return ids
 }
 
 function getMediaId(guid?: string) {
