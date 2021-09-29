@@ -10,7 +10,7 @@ export class EpisodeWebhook extends Webhook<PlexEpisode> {
     super(payload, media)
   }
 
-  async scrobble(member: IBetaSeriesMember) {
+  protected async scrobble(member: IBetaSeriesMember) {
     const episode = await this.getEpisode(member)
     if (episode.user.seen) {
       return false

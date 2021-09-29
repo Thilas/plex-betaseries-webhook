@@ -5,6 +5,7 @@ import { BetaSeries } from "../betaseries/betaseries"
 import { Payload } from "./payload"
 import { EpisodeWebhook } from "./webhooks/episode"
 import { MovieWebhook } from "./webhooks/movie"
+import { formatPayload } from "./webhooks/webhook"
 
 export function usePlexWebhook(
   app: express.Express,
@@ -86,16 +87,21 @@ function getBetaSeriesMember(betaSeries: BetaSeries, accessToken?: string) {
 }
 
 function getWebhook(payload: Payload) {
-  switch (payload.Metadata?.type) {
-    case "episode":
-      return new EpisodeWebhook(payload)
-    case "movie":
-      return new MovieWebhook(payload)
-    case undefined:
-    case "show":
-    case "track":
-      return undefined
-    default:
-      console.warn(`Unknown Plex metadata type: ${payload.Metadata?.type}`)
+  try {
+    switch (payload.Metadata?.type) {
+      case "episode":
+        return new EpisodeWebhook(payload)
+      case "movie":
+        return new MovieWebhook(payload)
+      case undefined:
+      case "show":
+      case "track":
+        return
+      default:
+        console.warn(`Unknown Plex metadata type: ${payload.Metadata?.type}`)
+    }
+  } catch (error) {
+    console.log(formatPayload(payload))
+    throw error
   }
 }
