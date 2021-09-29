@@ -8,6 +8,6 @@ betaseries:
   client:
     url: https://api.betaseries.com/
     apiVersion: '3.0'
-    timeoutInSeconds: 5
+    timeoutInSeconds: 10
     # clientId: ''
     # clientSecret: ''
