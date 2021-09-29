@@ -425,6 +425,20 @@ describe("server", () => {
             user: { seen: false },
           } as BetaSeriesEpisode
 
+          it("fails if scrobbling returns nothing", async () => {
+            // arrange
+            const { app, memberMock: mbMock } = initialize()
+            mbMock.setup((i) => i.getEpisode(It.IsAny())).returns(Promise.resolve(betaSeriesEpisode))
+            mbMock
+              .setup((i) => i.markEpisodeAsWatched(It.IsAny()))
+              .returns(Promise.resolve(undefined))
+            // act
+            const res = await request(app).post(url).field(payload)
+            // assert
+            expect(res.status).toEqual(400)
+            expect(res.text).toEqual("No episode found for: fakeTitle S01E02 (fakeId@tvdb)")
+          })
+
           it("fails if unable to scrobble", async () => {
             // arrange
             const { app, memberMock: mbMock } = initialize()
@@ -547,6 +561,20 @@ describe("server", () => {
             id: 1,
             user: { status: BetaSeriesMovieStatus.none },
           } as BetaSeriesMovie
+
+          it("fails if scrobbling returns nothing", async () => {
+            // arrange
+            const { app, memberMock: mbMock } = initialize()
+            mbMock.setup((i) => i.getMovie(It.IsAny())).returns(Promise.resolve(betaSeriesMovie))
+            mbMock
+              .setup((i) => i.updateMovie(It.IsAny()))
+              .returns(Promise.resolve(undefined))
+            // act
+            const res = await request(app).post(url).field(imdbPayload)
+            // assert
+            expect(res.status).toEqual(400)
+            expect(res.text).toEqual("No movie found for: fakeTitle (fakeId@imdb)")
+          })
 
           it("fails if unable to scrobble", async () => {
             // arrange
