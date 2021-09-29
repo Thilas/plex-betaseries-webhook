@@ -1,23 +1,26 @@
-import { Constructor } from "../../utils"
 import { PayloadGuid } from "../payload"
 
-type NonMediaId = UnknownId | undefined
-export type MediaId = Exclude<ReturnType<typeof getMediaId>, NonMediaId>
+export type MediaId = NonNullable<ReturnType<typeof getMediaId>>
 
 export function getMediaIds(guids?: PayloadGuid[]) {
   if (!guids) {
     throw new Error(`No guids`)
   }
-  return guids.map(guid => getMediaId(guid?.id))
+  const ids = guids
+    .map(guid => getMediaId(guid?.id))
+    .filter((id): id is MediaId => !!id)
+  return ids
 }
 
 function getMediaId(guid?: string) {
   if (!guid) {
-    throw new Error(`Empty guid`)
+    console.warn(`Empty guid`)
+    return
   }
   const match = /^(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
   if (!match?.groups) {
-    throw new Error(`Invalid guid: ${guid}`)
+    console.warn(`Invalid guid: ${guid}`)
+    return
   }
   switch (match.groups.agent) {
     case "tvdb":
@@ -27,23 +30,16 @@ function getMediaId(guid?: string) {
     case "tmdb":
       return new TmdbId(match.groups.id)
     default:
-      console.warn(`Unknown Plex agent: ${match.groups.agent}`)
-      return new UnknownId(guid)
+      console.warn(`Unknown Plex agent: ${guid}`)
+      return
   }
 }
 
-export function getSupportedMediaId<T extends MediaId>(values: (MediaId | NonMediaId)[], type: Constructor<T>): T | undefined {
-  for (const value of values) {
-    if (value instanceof type) return value
-  }
-  return undefined
-}
-
-export function formatMediaIds(values: (MediaId | NonMediaId)[]) {
+export function formatMediaIds(values: MediaId[]) {
   return values.join(", ")
 }
 
-abstract class BaseId<T> {
+abstract class BaseId<T extends string> {
   protected constructor(readonly kind: T, readonly value: string) {}
   toString() {
     return `${this.value}@${this.kind}`
@@ -65,14 +61,5 @@ export class ImdbId extends BaseId<"imdb"> {
 export class TmdbId extends BaseId<"tmdb"> {
   constructor(value: string) {
     super("tmdb", value)
-  }
-}
-
-class UnknownId extends BaseId<"unknown"> {
-  constructor(value: string) {
-    super("unknown", value)
-  }
-  toString() {
-    return this.value
   }
 }

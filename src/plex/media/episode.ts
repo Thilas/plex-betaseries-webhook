@@ -1,10 +1,11 @@
+import { getFirstSupportedOrDefault } from "../../utils"
 import { Payload } from "../payload"
-import { formatMediaIds, getMediaIds, getSupportedMediaId, TvdbId } from "./ids"
+import { formatMediaIds, getMediaIds, TvdbId } from "./ids"
 
 export class PlexEpisode {
   static create(payload: Payload) {
     const ids = getMediaIds(payload.Metadata?.Guid)
-    const id = getSupportedMediaId(ids, TvdbId)
+    const id = getFirstSupportedOrDefault(ids, [TvdbId])
     const title = payload.Metadata?.grandparentTitle
     const season = payload.Metadata?.parentIndex
     const episode = payload.Metadata?.index
