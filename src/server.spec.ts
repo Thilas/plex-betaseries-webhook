@@ -206,11 +206,12 @@ describe("server", () => {
         expect(res.text).toEqual("No guids")
       })
 
-      it("fails if empty", async () => {
+      it("warns if empty", async () => {
         // arrange
         const { app } = initialize()
+        console.warn = jest.fn()
         // act
-        const res = await request(app)
+        await request(app)
           .post(url)
           .field({
             payload: JSON.stringify({
@@ -220,15 +221,16 @@ describe("server", () => {
             })
           })
         // assert
-        expect(res.status).toEqual(400)
-        expect(res.text).toEqual("Empty guid")
+        expect(console.warn).toHaveBeenCalledTimes(1)
+        expect(console.warn).toHaveBeenCalledWith("Empty guid")
       })
 
-      it("fails if invalid", async () => {
+      it("warns if invalid", async () => {
         // arrange
         const { app } = initialize()
+        console.warn = jest.fn()
         // act
-        const res = await request(app)
+        await request(app)
           .post(url)
           .field({
             payload: JSON.stringify({
@@ -238,8 +240,8 @@ describe("server", () => {
             }),
           })
         // assert
-        expect(res.status).toEqual(400)
-        expect(res.text).toEqual("Invalid guid: fakeGuid")
+        expect(console.warn).toHaveBeenCalledTimes(1)
+        expect(console.warn).toHaveBeenCalledWith("Invalid guid: fakeGuid")
       })
 
       it("warns if unknown", async () => {
@@ -253,12 +255,12 @@ describe("server", () => {
             payload: JSON.stringify({
               event: "media.scrobble",
               user: true,
-              Metadata: { type: "episode", Guid: [{ id: "fakeAgent://fakeId\b" }] },
+              Metadata: { type: "episode", Guid: [{ id: "fakeAgent://fakeId" }] },
             }),
           })
         // assert
         expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Unknown Plex agent: fakeAgent")
+        expect(console.warn).toHaveBeenCalledWith("Unknown Plex agent: fakeAgent://fakeId")
       })
     })
 
@@ -276,7 +278,7 @@ describe("server", () => {
                 user: true,
                 Metadata: {
                   type: "movie",
-                  Guid: [{ id: "imdb://fakeId\b" }],
+                  Guid: [{ id: "imdb://fakeId" }],
                   title: "fakeTitle",
                 },
               }),
@@ -300,7 +302,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    Guid: [{ id: "tvdb://fakeId\b" }],
+                    Guid: [{ id: "tvdb://fakeId" }],
                     parentIndex: 1,
                     index: 2,
                   },
@@ -323,7 +325,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    Guid: [{ id: "tvdb://fakeId\b" }],
+                    Guid: [{ id: "tvdb://fakeId" }],
                     grandparentTitle: "fakeTitle",
                     index: 2,
                   },
@@ -346,7 +348,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    Guid: [{ id: "tvdb://fakeId\b" }],
+                    Guid: [{ id: "tvdb://fakeId" }],
                     grandparentTitle: "fakeTitle",
                     parentIndex: 1,
                   },
@@ -369,7 +371,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "episode",
-                    Guid: [{ id: "imdb://fakeId\b" }],
+                    Guid: [{ id: "imdb://fakeId" }],
                     grandparentTitle: "fakeTitle",
                     parentIndex: 1,
                     index: 2,
@@ -387,7 +389,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "episode",
-                Guid: [{ id: "tvdb://fakeId\b" }],
+                Guid: [{ id: "tvdb://fakeId" }],
                 grandparentTitle: "fakeTitle",
                 parentIndex: 1,
                 index: 2,
@@ -464,7 +466,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "movie",
-                    Guid: [{ id: "imdb://fakeId\b" }],
+                    Guid: [{ id: "imdb://fakeId" }],
                   },
                 }),
               })
@@ -485,7 +487,7 @@ describe("server", () => {
                   user: true,
                   Metadata: {
                     type: "movie",
-                    Guid: [{ id: "tvdb://fakeId\b" }],
+                    Guid: [{ id: "tvdb://fakeId" }],
                     title: "fakeTitle",
                   },
                 }),
@@ -501,7 +503,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "movie",
-                Guid: [{ id: "imdb://fakeId\b" }],
+                Guid: [{ id: "imdb://fakeId" }],
                 title: "fakeTitle",
               },
             }),
@@ -512,7 +514,7 @@ describe("server", () => {
               user: true,
               Metadata: {
                 type: "movie",
-                Guid: [{ id: "tmdb://fakeId2\b" }],
+                Guid: [{ id: "tmdb://fakeId2" }],
                 title: "fakeTitle2",
               },
             }),
