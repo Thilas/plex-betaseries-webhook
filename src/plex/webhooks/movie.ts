@@ -10,7 +10,7 @@ export class MovieWebhook extends Webhook<PlexMovie> {
     super(payload, media)
   }
 
-  async scrobble(member: IBetaSeriesMember) {
+  protected async scrobble(member: IBetaSeriesMember) {
     const movie = await this.getMovie(member)
     if (movie.user.status === BetaSeriesMovieStatus.seen) {
       return false

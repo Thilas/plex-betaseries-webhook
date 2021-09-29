@@ -1,12 +1,23 @@
 import { IBetaSeriesMember } from "../../betaseries/betaseries"
 import { Payload } from "../payload"
 
+function formatWebhook<M>(payload: Payload, media: M) {
+  const player = payload.Player?.title ?? "<unknown player>"
+  const account = payload.Account?.title ?? "<unknown account>"
+  const server = payload.Server?.title ?? "<unknown server>"
+  return `Got ${payload.event} event for ${media} on ${player} from ${account}@${server}`
+}
+
+export function formatPayload(payload: Payload) {
+  const type = payload.Metadata?.type ?? "<unknown type>"
+  const title = payload.Metadata?.title ?? "<unknown title>"
+  formatWebhook(payload, `${title} (${type})`)
+}
+
 export abstract class Webhook<M> {
   protected constructor(payload: Payload, readonly media: M) {
-    const player = payload.Player?.title ?? "<unknown player>"
-    const account = payload.Account?.title ?? "<unknown account>"
-    const server = payload.Server?.title ?? "<unknown server>"
-    console.log(`Got ${payload.event} event for ${media} on ${player} from ${account}@${server}`)
+    const message = formatWebhook(payload, media)
+    console.log(message)
   }
 
   processEvent(event: string, memberFactory: () => Promise<IBetaSeriesMember>) {
@@ -22,5 +33,5 @@ export abstract class Webhook<M> {
     console.log(result ? "Media scrobbled" : "Media already scrobbled")
   }
 
-  abstract scrobble(member: IBetaSeriesMember): Promise<boolean>
+  protected abstract scrobble(member: IBetaSeriesMember): Promise<boolean>
 }
