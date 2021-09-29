@@ -120,7 +120,7 @@ describe("betaseries", () => {
 
   describe("members", () => {
     describe("episode", () => {
-      it("gets episode from its TheTVDB id", async () => {
+      it("gets an episode from its TheTVDB id", async () => {
         // arrange
         const expectedEpisode = { id: 12, title: "fakeTitle", user: { seen: false } }
         mockAxiosInstanceForMember({

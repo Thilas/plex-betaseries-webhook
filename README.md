@@ -2,7 +2,7 @@
 
 [Plex webhook](https://support.plex.tv/articles/115002267687-webhooks/) to mark series and movies as watched on [BetaSeries](https://www.betaseries.com/).
 
-[![Build](https://github.com/Thilas/plex-betaseries-webhook/workflows/Build/badge.svg)](https://github.com/Thilas/plex-betaseries-webhook/actions?query=workflow%3ABuild)
+[![Build](https://github.com/Thilas/plex-betaseries-webhook/actions/workflows/build.yml/badge.svg)](https://github.com/Thilas/plex-betaseries-webhook/actions/workflows/build.yml)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=bugs)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Thilas_plex-betaseries-webhook&metric=coverage)](https://sonarcloud.io/dashboard?id=Thilas_plex-betaseries-webhook)
 [![Docker Version](https://img.shields.io/docker/v/thilas/plex-betaseries-webhook/latest?logo=docker) ![Docker Pulls](https://img.shields.io/docker/pulls/thilas/plex-betaseries-webhook?color=green&label=pulls&logo=docker)](https://registry.hub.docker.com/r/thilas/plex-betaseries-webhook)

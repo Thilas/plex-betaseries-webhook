@@ -59,7 +59,7 @@ class BetaSeriesMember implements IBetaSeriesMember {
     return params
   }
 
-  private getIdParam(id: MediaId): { [key: string]: string } {
+  private getIdParam(id: MediaId): Record<string, string> {
     switch (id.kind) {
       case "tvdb":
         return { thetvdb_id: id.value }
