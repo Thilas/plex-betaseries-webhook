@@ -1,5 +1,6 @@
 import { AxiosInstance } from "axios"
 import buildUrl from "build-url"
+import { logger } from "../logger"
 import { ImdbId, MediaId, TmdbId, TvdbId } from "../plex/media/ids"
 import { ClientConfig, getAccessToken, initializeClient } from "./client"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./models"
@@ -17,20 +18,20 @@ export class BetaSeries {
         redirect_uri: selfUrl,
       },
     })
-    console.log("Requesting BetaSeries authentication...")
+    logger.info("Requesting BetaSeries authentication...")
     return url
   }
 
   async getAccessToken(selfUrl: string, code: string) {
-    console.log("Requesting a new access token...")
+    logger.info("Requesting a new access token...")
     const { accessToken, login } = await getAccessToken(this.config.client, selfUrl, code)
-    console.log(`New access token issued for ${login}`)
+    logger.info(`New access token issued for ${login}`)
     return { accessToken, login }
   }
 
   async getMember(accessToken: string) {
     const { client, login } = await initializeClient(this.config.client, accessToken)
-    console.log(`Access token of ${login} checked`)
+    logger.info(`Access token of ${login} checked`)
     return new BetaSeriesMember(client, login) as IBetaSeriesMember
   }
 }

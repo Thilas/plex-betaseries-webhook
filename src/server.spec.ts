@@ -2,26 +2,30 @@ import { It, Mock } from "moq.ts"
 import request from "supertest"
 import { BetaSeries, IBetaSeriesMember } from "./betaseries/betaseries"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./betaseries/models"
+import { logger } from "./logger"
 import * as plex from "./plex/plex"
 import { initializeServer } from "./server"
 
 describe("server", () => {
-  //#region Console mock
+  //#region logger mock
   const backup = {
-    error: console.error,
-    warn: console.warn,
-    log: console.log,
+    error: logger.error,
+    warn: logger.warn,
+    info: logger.info,
+    debug: logger.debug,
   }
   beforeAll(() => {
-    console.error = jest.fn()
-    console.log = jest.fn()
+    logger.error = jest.fn()
+    logger.info = jest.fn()
+    logger.debug = jest.fn()
   })
   afterAll(() => {
-    console.error = backup.error
-    console.log = backup.log
+    logger.error = backup.error
+    logger.info = backup.info
+    logger.debug = backup.debug
   })
   afterEach(() => {
-    console.warn = backup.warn
+    logger.warn = backup.warn
   })
   //#endregion
 
@@ -150,7 +154,7 @@ describe("server", () => {
         // act
         const res = await request(app).post(url).send("data")
         // assert
-        expect(res.status).toEqual(400)
+        expect(res.status).toEqual(500)
         expect(res.text).toEqual("Missing payload")
       })
 
@@ -170,7 +174,7 @@ describe("server", () => {
       it("succeeds if missing", async () => {
         // arrange
         const { app } = initialize()
-        console.warn = jest.fn()
+        logger.warn = jest.fn()
         // act
         const res = await request(app)
           .post(url)
@@ -179,17 +183,17 @@ describe("server", () => {
         expect(res.status).toEqual(200)
       })
 
-      it("warns if unknown", async () => {
+      it("fails if unknown", async () => {
         // arrange
         const { app } = initialize()
-        console.warn = jest.fn()
+        logger.warn = jest.fn()
         // act
-        await request(app)
+        const res = await request(app)
           .post(url)
           .field({ payload: JSON.stringify({ user: true, Metadata: { type: "fakeType" } }) })
         // assert
-        expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Unknown Plex metadata type: fakeType")
+        expect(res.status).toEqual(500)
+        expect(res.text).toEqual("Unknown Plex metadata type: fakeType")
       })
     })
 
@@ -202,14 +206,14 @@ describe("server", () => {
           .post(url)
           .field({ payload: JSON.stringify({ event: "media.scrobble", user: true, Metadata: { type: "episode" } }) })
         // assert
-        expect(res.status).toEqual(400)
+        expect(res.status).toEqual(500)
         expect(res.text).toEqual("No guids")
       })
 
       it("warns if empty", async () => {
         // arrange
         const { app } = initialize()
-        console.warn = jest.fn()
+        logger.warn = jest.fn()
         // act
         await request(app)
           .post(url)
@@ -217,18 +221,18 @@ describe("server", () => {
             payload: JSON.stringify({
               event: "media.scrobble",
               user: true,
-              Metadata: { type: "episode", Guid: [undefined] }
+              Metadata: { type: "episode", Guid: [{}] }
             })
           })
         // assert
-        expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Empty guid")
+        expect(logger.warn).toHaveBeenCalledTimes(1)
+        expect(logger.warn).toHaveBeenCalledWith("Empty guid")
       })
 
       it("warns if invalid", async () => {
         // arrange
         const { app } = initialize()
-        console.warn = jest.fn()
+        logger.warn = jest.fn()
         // act
         await request(app)
           .post(url)
@@ -240,14 +244,14 @@ describe("server", () => {
             }),
           })
         // assert
-        expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Invalid guid: fakeGuid")
+        expect(logger.warn).toHaveBeenCalledTimes(1)
+        expect(logger.warn).toHaveBeenCalledWith("Invalid guid: fakeGuid")
       })
 
       it("warns if unknown", async () => {
         // arrange
         const { app } = initialize()
-        console.warn = jest.fn()
+        logger.warn = jest.fn()
         // act
         await request(app)
           .post(url)
@@ -259,8 +263,8 @@ describe("server", () => {
             }),
           })
         // assert
-        expect(console.warn).toHaveBeenCalledTimes(1)
-        expect(console.warn).toHaveBeenCalledWith("Unknown Plex agent: fakeAgent://fakeId")
+        expect(logger.warn).toHaveBeenCalledTimes(1)
+        expect(logger.warn).toHaveBeenCalledWith("Unknown Plex agent: fakeAgent://fakeId")
       })
     })
 
@@ -309,7 +313,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Invalid episode: undefined S01E02 (fakeId@tvdb)")
           })
 
@@ -332,7 +336,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Invalid episode: fakeTitle S??E02 (fakeId@tvdb)")
           })
 
@@ -355,7 +359,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Invalid episode: fakeTitle S01E?? (fakeId@tvdb)")
           })
 
@@ -379,7 +383,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Unsupported episode id for fakeTitle S01E02: fakeId@imdb")
           })
 
@@ -404,7 +408,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(payload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("No episode found for: fakeTitle S01E02 (fakeId@tvdb)")
           })
 
@@ -435,7 +439,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(payload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("No episode found for: fakeTitle S01E02 (fakeId@tvdb)")
           })
 
@@ -449,7 +453,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(payload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Episode not marked as watched for: fakeTitle S01E02 (fakeId@tvdb)")
           })
 
@@ -485,7 +489,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Invalid movie: undefined (fakeId@imdb)")
           })
 
@@ -507,7 +511,7 @@ describe("server", () => {
                 }),
               })
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Unsupported movie id for fakeTitle: fakeId@tvdb")
           })
 
@@ -541,7 +545,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(imdbPayload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("No movie found for: fakeTitle (fakeId@imdb)")
           })
 
@@ -572,7 +576,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(imdbPayload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("No movie found for: fakeTitle (fakeId@imdb)")
           })
 
@@ -586,7 +590,7 @@ describe("server", () => {
             // act
             const res = await request(app).post(url).field(imdbPayload)
             // assert
-            expect(res.status).toEqual(400)
+            expect(res.status).toEqual(500)
             expect(res.text).toEqual("Movie not marked as watched for: fakeTitle (fakeId@imdb)")
           })
 

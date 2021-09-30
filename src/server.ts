@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express"
 import { Server } from "http"
 import { BetaSeries } from "./betaseries/betaseries"
+import { logger } from "./logger"
 import { usePlexWebhook } from "./plex/plex"
 
 type ServerConfig = {
@@ -18,16 +19,20 @@ export function initializeServer(betaSeries: BetaSeries, serverConfig?: ServerCo
   usePlexWebhook(app, url, { dest: serverConfig?.temp }, betaSeries)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    console.error(err)
-    res.status(400).send(err.message ?? err)
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+    // Handle errors
+    logger.error("Unexpected error:", err)
+    logger.debug(`${req.method} ${req.originalUrl}`)
+    logger.debug("Headers", req.headers)
+    logger.debug("Body", req.params)
+    res.status(500).send(err.message ?? err)
   })
 
   const server = listen
     ? new Promise<Server>((resolve) => {
       const result = app.listen(port)
       result.on("listening", () => {
-        console.log(`Express app running at ${url}`)
+        logger.info(`Express app running at ${url}`)
         resolve(result)
       })
     })

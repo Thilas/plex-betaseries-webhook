@@ -1,5 +1,6 @@
 import MockAdapter from "axios-mock-adapter/types"
 import { AxiosInstanceMock } from "../../test/axios"
+import { logger } from "../logger"
 import { BetaSeries } from "./betaseries"
 import { BetaSeriesMovieStatus } from "./models"
 
@@ -13,22 +14,25 @@ describe("betaseries", () => {
     axiosInstanceMock.dispose()
   })
   //#endregion
-  //#region Console mock
+  //#region logger mock
   const backup = {
-    error: console.error,
-    warn: console.warn,
-    log: console.log,
+    error: logger.error,
+    warn: logger.warn,
+    info: logger.info,
+    debug: logger.debug,
   }
   beforeAll(() => {
-    console.error = jest.fn()
-    console.log = jest.fn()
+    logger.error = jest.fn()
+    logger.info = jest.fn()
+    logger.debug = jest.fn()
   })
   afterAll(() => {
-    console.error = backup.error
-    console.log = backup.log
+    logger.error = backup.error
+    logger.info = backup.info
+    logger.debug = backup.debug
   })
   afterEach(() => {
-    console.warn = backup.warn
+    logger.warn = backup.warn
   })
   //#endregion
 
