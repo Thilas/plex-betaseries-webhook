@@ -1,3 +1,4 @@
+import { logger } from "../../logger"
 import { PayloadGuid } from "../payload"
 
 export type MediaId = NonNullable<ReturnType<typeof getMediaId>>
@@ -13,12 +14,12 @@ export function getMediaIds(guids?: PayloadGuid[]) {
 
 function getMediaId(guid?: string) {
   if (!guid) {
-    console.warn(`Empty guid`)
+    logger.warn(`Empty guid`)
     return
   }
   const match = /^(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
   if (!match?.groups) {
-    console.warn(`Invalid guid: ${guid}`)
+    logger.warn(`Invalid guid: ${guid}`)
     return
   }
   switch (match.groups.agent) {
@@ -29,7 +30,7 @@ function getMediaId(guid?: string) {
     case "tmdb":
       return new TmdbId(match.groups.id)
     default:
-      console.warn(`Unknown Plex agent: ${guid}`)
+      logger.warn(`Unknown Plex agent: ${guid}`)
       return
   }
 }
