@@ -1,44 +1,37 @@
-import { IBetaSeriesMember } from "../../betaseries/betaseries"
-import { BetaSeriesMovie, BetaSeriesMovieStatus } from "../../betaseries/models"
-import { PlexMovie } from "../media/movie"
-import { Payload } from "../payload"
-import { Webhook } from "./webhook"
+import { inject, named } from "inversify"
+import { BetaSeriesMember } from "../../betaseries/betaseries"
+import { BetaSeriesMovieStatus } from "../../betaseries/models"
+import { ids, provideWebhook } from "../../decorators"
+import { ILogger } from "../../logger"
+import { Payload } from "../../middlewares/payload"
+import { PlexMovieFactory, PlexMovieType } from "../media/movie"
+import { IWebhook, WebhookManagerInfoLogMethod } from "./manager"
 
-export class MovieWebhook extends Webhook<PlexMovie> {
-  constructor(payload: Payload) {
-    const media = PlexMovie.create(payload)
-    super(payload, media)
-  }
+@provideWebhook(PlexMovieType, "media.scrobble")
+export class MovieScrobbleWebhook implements IWebhook {
+  constructor(
+    @inject(ids.logger) readonly logger: ILogger,
+    @inject(ids.mediaFactory) @named(PlexMovieType) readonly mediaFactory: PlexMovieFactory,
+  ) {}
 
-  protected async scrobble(member: IBetaSeriesMember) {
-    const movie = await this.getMovie(member)
+  async process(payload: Payload, member: BetaSeriesMember, info: WebhookManagerInfoLogMethod) {
+    const media = this.mediaFactory.create(payload)
+    info(media.toString())
+    const movie = await member.getMovie({ id: media.id })
+    if (!movie) {
+      throw new Error(`No movie found for: ${media.toString()}`)
+    }
     if (movie.user.status === BetaSeriesMovieStatus.seen) {
-      return false
+      this.logger.info("Movie already scrobbled")
+      return
     }
-    const result = await this.updateMovie(member, movie, { state: BetaSeriesMovieStatus.seen })
+    const result = await member.updateMovie({ id: movie.id, state: BetaSeriesMovieStatus.seen })
+    if (!result) {
+      throw new Error(`No movie found for: ${media.toString()}`)
+    }
     if (result.user.status !== BetaSeriesMovieStatus.seen) {
-      throw new Error(`Movie not marked as watched for: ${this.media}`)
+      throw new Error(`Movie not marked as watched for: ${media.toString()}`)
     }
-    return true
-  }
-
-  private async getMovie(member: IBetaSeriesMember) {
-    const result = await member.getMovie({ id: this.media.id })
-    if (!result) {
-      throw new Error(`No movie found for: ${this.media}`)
-    }
-    return result
-  }
-
-  private async updateMovie(
-    member: IBetaSeriesMember,
-    movie: BetaSeriesMovie,
-    params: { state?: BetaSeriesMovieStatus },
-  ) {
-    const result = await member.updateMovie({ id: movie.id, ...params })
-    if (!result) {
-      throw new Error(`No movie found for: ${this.media}`)
-    }
-    return result
+    this.logger.info("Movie scrobbled")
   }
 }

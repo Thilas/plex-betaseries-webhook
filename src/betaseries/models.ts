@@ -1,18 +1,18 @@
-export interface BetaSeriesEpisode {
-  id: number
-  title: string
-  season: number
-  episode: number
-  user: {
-    seen: boolean
+export type BetaSeriesEpisode = {
+  readonly id: number
+  readonly title: string
+  readonly season: number
+  readonly episode: number
+  readonly user: {
+    readonly seen: boolean
   }
 }
 
-export interface BetaSeriesMovie {
-  id: number
-  title: string
-  user: {
-    status: BetaSeriesMovieStatus
+export type BetaSeriesMovie = {
+  readonly id: number
+  readonly title: string
+  readonly user: {
+    readonly status: BetaSeriesMovieStatus
   }
 }
 

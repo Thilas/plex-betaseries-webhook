@@ -1,5 +1,6 @@
-import config from "config"
-import { BetaSeries } from "./betaseries/betaseries"
-import { initializeServer } from "./server"
+import "reflect-metadata"
+import { container } from "./container"
+import { Server } from "./server"
 
-initializeServer(new BetaSeries(config.get("betaseries")), config.get("server"), true)
+const server = container.get(Server)
+server.listen()

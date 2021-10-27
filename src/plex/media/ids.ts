@@ -1,20 +1,18 @@
-import { logger } from "../../logger"
-import { PayloadGuid } from "../payload"
+import { ILogger } from "../../logger"
+import { PayloadGuid } from "../../middlewares/payload"
 
 export type MediaId = NonNullable<ReturnType<typeof getMediaId>>
 
-export function getMediaIds(guids?: PayloadGuid[]) {
+export function getMediaIds(logger: ILogger, guids?: PayloadGuid[]) {
   if (!guids) {
     throw new Error(`No guids`)
   }
-  return guids
-    .map(guid => getMediaId(guid?.id))
-    .filter((id): id is MediaId => !!id)
+  return guids.map((guid) => getMediaId(logger, guid?.id)).filter((id): id is MediaId => !!id)
 }
 
-function getMediaId(guid?: string) {
+function getMediaId(logger: ILogger, guid?: string) {
   if (!guid) {
-    logger.warn(`Empty guid`)
+    logger.warn("Empty guid")
     return
   }
   const match = /^(?<agent>\w+):\/\/(?<id>\w+)\b/.exec(guid)
@@ -35,11 +33,11 @@ function getMediaId(guid?: string) {
   }
 }
 
-export function formatMediaIds(values: MediaId[]) {
+export function formatMediaIds(values: BaseId[]) {
   return values.join(", ")
 }
 
-abstract class BaseId<T extends string> {
+abstract class BaseId<T extends string = string> {
   protected constructor(readonly kind: T, readonly value: string) {}
   toString() {
     return `${this.value}@${this.kind}`

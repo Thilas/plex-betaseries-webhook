@@ -5,6 +5,5 @@ module.exports = {
   rootDir: ".",
   testMatch: ["<rootDir>/src/**/*.spec.ts"],
   testResultsProcessor: "jest-sonar-reporter",
-  collectCoverage: true,
   collectCoverageFrom: ["<rootDir>/src/**/*.ts", "!<rootDir>/src/**/*.spec.ts"],
 }

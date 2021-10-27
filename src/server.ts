@@ -1,42 +1,26 @@
-import express, { NextFunction, Request, Response } from "express"
-import { Server } from "http"
-import { BetaSeries } from "./betaseries/betaseries"
-import { logger } from "./logger"
-import { usePlexWebhook } from "./plex/plex"
+import { Container, inject } from "inversify"
+import { InversifyExpressServer } from "inversify-express-utils"
+import { BetaSeriesAuthProvider } from "./betaseries/authentication"
+import { Configuration } from "./configuration"
+import { ids, provideSingleton } from "./decorators"
+import { ILogger } from "./logger"
+import { getErrorHandler } from "./middlewares/error"
 
-type ServerConfig = {
-  readonly url?: string
-  readonly port?: number
-  readonly temp?: string
-}
+@provideSingleton(Server)
+export class Server {
+  constructor(
+    readonly container: Container,
+    @inject(ids.logger) readonly logger: ILogger,
+    readonly configuration: Configuration,
+  ) {}
 
-export function initializeServer(betaSeries: BetaSeries, serverConfig?: ServerConfig, listen = false) {
-  const app = express()
-
-  const port = serverConfig?.port ?? 12000
-  const urlPort = port === 80 ? "" : `:${port}`
-  const url = serverConfig?.url ?? `http://localhost${urlPort}/`
-  usePlexWebhook(app, url, { dest: serverConfig?.temp }, betaSeries)
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-    // Handle errors
-    logger.error("Unexpected error:", err)
-    logger.debug(`${req.method} ${req.originalUrl}`)
-    logger.debug("Headers", req.headers)
-    logger.debug("Body", req.params)
-    res.status(500).send(err.message ?? err)
-  })
-
-  const server = listen
-    ? new Promise<Server>((resolve) => {
-      const result = app.listen(port)
-      result.on("listening", () => {
-        logger.info(`Express app running at ${url}`)
-        resolve(result)
+  listen() {
+    new InversifyExpressServer(this.container, null, null, null, BetaSeriesAuthProvider)
+      .setErrorConfig((app) => app.use(getErrorHandler(this.logger)))
+      .build()
+      .listen(this.configuration.server.port)
+      .on("listening", () => {
+        this.logger.info(`Server running at ${this.configuration.server.url}`)
       })
-    })
-    : undefined
-
-  return { app, server }
+  }
 }
