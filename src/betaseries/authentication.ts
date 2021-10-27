@@ -10,8 +10,8 @@ export class BetaSeriesAuthProvider implements interfaces.AuthProvider {
   async getUser(req: Request) {
     const accessToken = req.query["accessToken"]
     if (typeof accessToken !== "string") {
-      return await this.betaseries.getPrincipal()
+      return this.betaseries.getPrincipal()
     }
-    return await this.betaseries.getPrincipal(accessToken)
+    return this.betaseries.getPrincipal(accessToken)
   }
 }
