@@ -1,44 +1,36 @@
-import { IBetaSeriesMember } from "../../betaseries/betaseries"
-import { BetaSeriesEpisode } from "../../betaseries/models"
-import { PlexEpisode } from "../media/episode"
-import { Payload } from "../payload"
-import { Webhook } from "./webhook"
+import { inject, named } from "inversify"
+import { BetaSeriesMember } from "../../betaseries/betaseries"
+import { ids, provideWebhook } from "../../decorators"
+import { ILogger } from "../../logger"
+import { Payload } from "../../middlewares/payload"
+import { PlexEpisodeFactory, PlexEpisodeType } from "../media/episode"
+import { IWebhook, WebhookManagerInfoLogMethod } from "./manager"
 
-export class EpisodeWebhook extends Webhook<PlexEpisode> {
-  constructor(payload: Payload) {
-    const media = PlexEpisode.create(payload)
-    super(payload, media)
-  }
+@provideWebhook(PlexEpisodeType, "media.scrobble")
+export class EpisodeScrobbleWebhook implements IWebhook {
+  constructor(
+    @inject(ids.logger) readonly logger: ILogger,
+    @inject(ids.mediaFactory) @named(PlexEpisodeType) readonly mediaFactory: PlexEpisodeFactory,
+  ) {}
 
-  protected async scrobble(member: IBetaSeriesMember) {
-    const episode = await this.getEpisode(member)
+  async process(payload: Payload, member: BetaSeriesMember, info: WebhookManagerInfoLogMethod) {
+    const media = this.mediaFactory.create(payload)
+    info(media.toString())
+    const episode = await member.getEpisode({ id: media.id })
+    if (!episode) {
+      throw new Error(`No episode found for: ${media.toString()}`)
+    }
     if (episode.user.seen) {
-      return false
+      this.logger.info("Episode already scrobbled")
+      return
     }
-    const result = await this.markEpisodeAsWatched(member, episode, { bulk: false })
+    const result = await member.markEpisodeAsWatched({ id: episode.id, bulk: false })
+    if (!result) {
+      throw new Error(`No episode found for: ${media.toString()}`)
+    }
     if (!result.user.seen) {
-      throw new Error(`Episode not marked as watched for: ${this.media}`)
+      throw new Error(`Episode not marked as watched for: ${media.toString()}`)
     }
-    return true
-  }
-
-  private async getEpisode(member: IBetaSeriesMember) {
-    const result = await member.getEpisode({ id: this.media.id })
-    if (!result) {
-      throw new Error(`No episode found for: ${this.media}`)
-    }
-    return result
-  }
-
-  private async markEpisodeAsWatched(
-    member: IBetaSeriesMember,
-    episode: BetaSeriesEpisode,
-    params: { bulk?: boolean },
-  ) {
-    const result = await member.markEpisodeAsWatched({ id: episode.id, ...params })
-    if (!result) {
-      throw new Error(`No episode found for: ${this.media}`)
-    }
-    return result
+    this.logger.info("Episode scrobbled")
   }
 }

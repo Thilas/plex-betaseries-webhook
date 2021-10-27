@@ -1,13 +1,15 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.organizeImports": true
+    "source.fixAll": true
   },
-  "eslint.validate": [
-    "javascript",
-    "typescript"
-  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "eslint.enable": true,
+  "eslint.validate": ["javascript", "typescript"],
+  "jest.autoRun": {
+    "watch": false,
+    "onSave": "test-src-file"
+  },
   "search.exclude": {
     "**/coverage": true,
     "**/dist": true,

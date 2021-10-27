@@ -1,10 +1,21 @@
+import { inject } from "inversify"
+import { EpisodeMediaId } from "../../betaseries/betaseries"
+import { ids, provideMediaFactory, provideSingleton } from "../../decorators"
+import { ILogger } from "../../logger"
+import { Payload } from "../../middlewares/payload"
 import { getFirstSupportedOrDefault } from "../../utils"
-import { Payload } from "../payload"
+import { IMedia, IMediaFactory } from "../webhooks/manager"
 import { formatMediaIds, getMediaIds, TvdbId } from "./ids"
 
-export class PlexEpisode {
-  static create(payload: Payload) {
-    const ids = getMediaIds(payload.Metadata?.Guid)
+export const PlexEpisodeType = "episode"
+
+@provideSingleton(PlexEpisodeFactory)
+@provideMediaFactory(PlexEpisodeType)
+export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
+  constructor(@inject(ids.logger) readonly logger: ILogger) {}
+
+  create(payload: Payload): IMedia<EpisodeMediaId> {
+    const ids = getMediaIds(this.logger, payload.Metadata?.Guid)
     const id = getFirstSupportedOrDefault(ids, [TvdbId])
     const title = payload.Metadata?.grandparentTitle
     const season = payload.Metadata?.parentIndex
@@ -13,15 +24,19 @@ export class PlexEpisode {
       throw new Error(`Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(ids)}`)
     }
     if (!title || !season || !episode) {
-      throw new Error(`Invalid episode: ${title} ${formatEpisode(season, episode)} (${id})`)
+      throw new Error(
+        `Invalid episode: ${title ?? "<unknown title>"} ${formatEpisode(season, episode)} (${id.toString()})`,
+      )
     }
     return new PlexEpisode(id, title, season, episode)
   }
+}
 
-  private constructor(readonly id: TvdbId, readonly title: string, readonly season: number, readonly episode: number) {}
+class PlexEpisode implements IMedia<EpisodeMediaId> {
+  constructor(readonly id: EpisodeMediaId, readonly title: string, readonly season: number, readonly episode: number) {}
 
   toString() {
-    return `${this.title} ${formatEpisode(this.season, this.episode)} (${this.id})`
+    return `${this.title} ${formatEpisode(this.season, this.episode)} (${this.id.toString()})`
   }
 }
 
