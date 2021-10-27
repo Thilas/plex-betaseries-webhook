@@ -6,8 +6,8 @@ import { BetaSeriesMovie, BetaSeriesMovieStatus } from "../../betaseries/models"
 import { Payload } from "../../middlewares/payload"
 import { ImdbId } from "../media/ids"
 import { PlexMovieFactory } from "../media/movie"
-import { MovieScrobbleWebhook } from "./movie"
 import { IMedia } from "./manager"
+import { MovieScrobbleWebhook } from "./movie"
 
 const fakeLogger = getLoggerMock().object()
 const fakePayload = {} as Payload

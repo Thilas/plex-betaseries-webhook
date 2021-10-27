@@ -15,13 +15,15 @@ export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
   constructor(@inject(ids.logger) readonly logger: ILogger) {}
 
   create(payload: Payload): IMedia<EpisodeMediaId> {
-    const ids = getMediaIds(this.logger, payload.Metadata?.Guid)
-    const id = getFirstSupportedOrDefault(ids, [TvdbId])
+    const allIds = getMediaIds(this.logger, payload.Metadata?.Guid)
+    const id = getFirstSupportedOrDefault(allIds, [TvdbId])
     const title = payload.Metadata?.grandparentTitle
     const season = payload.Metadata?.parentIndex
     const episode = payload.Metadata?.index
     if (!id) {
-      throw new Error(`Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(ids)}`)
+      throw new Error(
+        `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(allIds)}`,
+      )
     }
     if (!title || !season || !episode) {
       throw new Error(

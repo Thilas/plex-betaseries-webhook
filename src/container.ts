@@ -9,8 +9,8 @@ import { getMulterFactory, IMulterFactory } from "./middlewares/multer"
 import { PayloadProvider } from "./middlewares/payload"
 import { MediaId } from "./plex/media/ids"
 import "./plex/webhooks/episode"
-import "./plex/webhooks/movie"
 import { IMediaFactory, IWebhook, MediaFactoryProvider, WebhookProvider } from "./plex/webhooks/manager"
+import "./plex/webhooks/movie"
 import "./server"
 
 const containerModule = new ContainerModule((bind) => {

@@ -1,8 +1,8 @@
-import { IConfig } from "config"
+import type { IConfig } from "config"
 import { inject } from "inversify"
 import { ids, provideSingleton } from "./decorators"
 
-export { IConfig } from "config"
+export type { IConfig } from "config"
 
 export function getConfig(): IConfig {
   return require("config")
@@ -16,8 +16,9 @@ export class Configuration {
   constructor(@inject(ids.config) config: IConfig) {
     const server = config.get("server") as Partial<ServerConfiguration>
     const port = server?.port ?? 12000
+    const urlPort = port === 80 ? "" : `:${port}`
     this.server = {
-      url: server?.url ?? `http://localhost${port === 80 ? "" : `:${port}`}/`,
+      url: server?.url ?? `http://localhost${urlPort}/`,
       port: port,
       temp: server?.temp,
     }

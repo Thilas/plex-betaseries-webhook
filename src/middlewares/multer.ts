@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express"
 import { inject } from "inversify"
 import { BaseMiddleware } from "inversify-express-utils"
-import multer from "multer"
+import type multer from "multer"
 import { Configuration } from "../configuration"
 import { ids, provideSingleton } from "../decorators"
 
@@ -17,8 +17,7 @@ export class MulterMiddleware extends BaseMiddleware {
 
   constructor(configuration: Configuration, @inject(ids.multerFactory) multerFactory: IMulterFactory) {
     super()
-    const multer = multerFactory({ dest: configuration.server.temp })
-    this.multerHandler = multer.any()
+    this.multerHandler = multerFactory({ dest: configuration.server.temp, limits: { fileSize: 2000000 } }).any()
   }
 
   handler(req: Request, res: Response, next: NextFunction) {
