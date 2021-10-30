@@ -13,9 +13,12 @@ Debug program:
 - Run Build Task (`Ctrl` + `Shift` + `B`)
 - Run Target `Launch Program` (`F5`)
 
-Debug test:
+Debug tests:
 
-- Run Target `Jest Current File` (`F5`)
+You need to have [vscode-jest](https://github.com/jest-community/vscode-jest) extension:
+
+- Right click on a test either in the Test Explorer or from CodeLens
+- Click on `Debug Test`
 
 ### Bash
 
@@ -26,7 +29,7 @@ npm ci
 npm run build
 # Run tests
 npm test
-# Start bots
+# Start program
 npm start
 ```
 

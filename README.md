@@ -59,7 +59,7 @@ In order to configure the Plex webhook, its url must be obtained thanks to the f
 - access the webhook using its public url for a browser
 - after redirection to BetaSeries, log in using your account (if not already done)
 
-The url will look like `<public url>/token/xxxxxxxxxxxx` and can be used as a Plex webhook.
+The url will look like `<public url>/?accessToken=/xxxxxxxxxxxx` and can be used as a Plex webhook.
 
 ## Support Info
 
