@@ -43,7 +43,7 @@ describe("ErrorMiddleware", () => {
     // act
     handler(fakeError, fakeReq, fakeRes, fakeNext)
     // assert
-    const expectedMessage = `Cannot ${fakeMethod} ${fakeUrl}`
+    const expectedMessage = `${fakeMethod} ${fakeUrl}`
     resMock
       .verify((e) => e.status(500), Times.Once())
       .verify((e) => e.send(`${expectedMessage}: ${fakeError.message}`), Times.Once())
