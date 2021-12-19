@@ -8,6 +8,7 @@ import {
   HttpResponseMessage,
   queryParam,
   StringContent,
+  JsonContent,
 } from "inversify-express-utils"
 import { BetaSeries, BetaSeriesPrincipal, BetaSeriesUser } from "../betaseries/betaseries"
 import { Configuration } from "../configuration"
@@ -50,6 +51,15 @@ export class WebhookController extends BaseHttpController {
     }
     const payload = await this.getPayload()
     await this.webhookManager.process(payload, user)
+  }
+
+  @httpGet("healthcheck")
+  async healthcheck() {
+    const message = new HttpResponseMessage()
+    message.content = new JsonContent({"status":"ok"})
+    message.content.headers["content-type"] = "application/json"
+    message.statusCode = 200
+    return this.responseMessage(message)
   }
 
   private async getUrl(code?: string) {

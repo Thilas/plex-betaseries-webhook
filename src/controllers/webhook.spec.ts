@@ -95,6 +95,15 @@ describe("WebhookController", () => {
       // assert
       expect(result).toBeInstanceOf(results.ResponseMessageResult)
     })
+
+    it("returns healthcheck status", async() => {
+      // arrange
+      const { controller } = setup({ authenticated: true })
+      // act
+      const result = await controller.healthcheck()
+      // assert
+      expect(result).toBeInstanceOf(results.ResponseMessageResult)
+    })
   })
 
   describe("post", () => {
