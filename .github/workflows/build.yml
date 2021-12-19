@@ -52,7 +52,7 @@ jobs:
         working-directory: ${{ env.SONAR_DIRECTORY }} # Align on SonarCloud scanner default working directory
 
       - name: SonarCloud scan
-        if: ${{ secrets.SONAR_TOKEN }}
+        if: ${{ github.repository_owner == 'Thilas' }} # Unable to scan from forks for now
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
