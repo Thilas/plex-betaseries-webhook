@@ -16,6 +16,7 @@ Here are some snippets to help get started creating a docker container.
 ```bash
 docker create \
   --name=plex-betaseries-webhook \
+  -h plex-betaseries-webhook \
   -e SERVER_URL=https://my.plex.webhook \
   -e BETASERIES_CLIENTID=xxxxxxxxxxxx \
   -e BETASERIES_CLIENTSECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
@@ -26,12 +27,13 @@ docker create \
 
 ### docker-compose
 
-```yaml
+```yml
 version: "3.8"
 services:
   plex-betaseries-webhook:
     image: thilas/plex-betaseries-webhook
     container_name: plex-betaseries-webhook
+    hostname: plex-betaseries-webhook
     environment:
       - SERVER_URL=https://my.plex.webhook
       - BETASERIES_CLIENTID=xxxxxxxxxxxx
@@ -50,7 +52,9 @@ services:
 | `-e BETASERIES_CLIENTSECRET=xxx` | [BetaSeries](https://www.betaseries.com/api/) client secret |
 | `-p 12000:12000`                 | Plex webhook port                                           |
 
-Public url is expected to be forwarded to the container on the exposed port.
+A public url is expected to be forwarded to the container on the exposed port.
+
+Optionally, a health check can be provided to docker to monitor the container's health status using the dedicated endpoint: <http://localhost:12000/health>.
 
 ## Webhook Setup
 

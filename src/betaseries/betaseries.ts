@@ -30,7 +30,7 @@ export class BetaSeries {
       client_id: this.configuration.betaseries.client.clientId,
       client_secret: this.configuration.betaseries.client.clientSecret,
       redirect_uri: this.configuration.server.url,
-      code: code,
+      code,
     })
     const accessToken = res.data.access_token
     const { login } = await this.checkAccessToken(accessToken)

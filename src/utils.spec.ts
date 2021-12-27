@@ -1,4 +1,18 @@
-import { getFirstSupportedOrDefault, hasMember } from "./utils"
+import { delay, getFirstSupportedOrDefault, hasMember } from "./utils"
+
+describe("delay", () => {
+  it("returns false if the object doesn't have a specific member", async () => {
+    // arange
+    const ms = 10
+    const start = Date.now()
+    // act
+    await delay(ms)
+    // assert
+    const end = Date.now()
+    expect(end - start).toBeGreaterThanOrEqual(ms)
+    expect(end - start).toBeLessThan(10 * ms)
+  })
+})
 
 describe("getFirstSupportedOrDefault", () => {
   abstract class Base {

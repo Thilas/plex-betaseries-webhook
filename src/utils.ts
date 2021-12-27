@@ -3,6 +3,10 @@ export type Constructor<T, TArgs extends any[] = any[]> = new (...args: TArgs) =
 
 export type NewReturnType<T, TNew> = T extends (...args: infer TArgs) => unknown ? (...args: TArgs) => TNew : never
 
+export function delay(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms))
+}
+
 export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: T[], types: C[]) {
   for (const type of types) {
     for (const value of values) {

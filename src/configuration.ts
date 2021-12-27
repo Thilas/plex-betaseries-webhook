@@ -19,7 +19,7 @@ export class Configuration {
     const urlPort = port === 80 ? "" : `:${port}`
     this.server = {
       url: server?.url ?? `http://localhost${urlPort}/`,
-      port: port,
+      port,
       temp: server?.temp,
     }
     this.betaseries = config.get("betaseries")
