@@ -54,7 +54,7 @@ services:
 
 A public url is expected to be forwarded to the container on the exposed port.
 
-Optionally, a health check can be provided to docker to monitor the container's health status using the dedicated endpoint: <http://localhost:12000/health>.
+A health check is defined by default in order for docker to monitor the container's health status using the dedicated endpoint: <http://localhost:12000/health>.
 
 ## Webhook Setup
 
