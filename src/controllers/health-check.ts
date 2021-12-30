@@ -1,16 +1,19 @@
 import { inject } from "inversify"
 import { BaseHttpController, controller, httpGet, HttpResponseMessage, JsonContent } from "inversify-express-utils"
-import { HealthCheck, HealthResponse } from "../health-check/health-check"
+import { HealthCheckManager } from "../health-check/health-check"
+import { HealthResponse } from "../health-check/models"
 
-@controller("/health")
+export const HealthCheckPath = "/health"
+
+@controller(HealthCheckPath)
 export class HealthCheckController extends BaseHttpController {
-  constructor(@inject(HealthCheck) readonly healthCheck: HealthCheck) {
+  constructor(@inject(HealthCheckManager) readonly healthCheckManager: HealthCheckManager) {
     super()
   }
 
   @httpGet("/")
   async get() {
-    const response = await this.healthCheck.get()
+    const response = await this.healthCheckManager.getHealthCheck()
     const statusCode = this.getStatusCode(response)
     const message = new HttpResponseMessage(statusCode)
     message.content = new JsonContent(response)

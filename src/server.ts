@@ -5,16 +5,17 @@ import { Configuration } from "./configuration"
 import { ids, provideSingleton } from "./decorators"
 import { ILogger } from "./logger"
 import { getErrorHandler } from "./middlewares/error"
+import { IProcess } from "./process"
 
 @provideSingleton(Server)
-export class Server {
+export class Server implements IProcess {
   constructor(
     readonly container: Container,
     @inject(ids.logger) readonly logger: ILogger,
     readonly configuration: Configuration,
   ) {}
 
-  listen() {
+  start() {
     new InversifyExpressServer(this.container, null, null, null, BetaSeriesAuthProvider)
       .setErrorConfig((app) => app.use(getErrorHandler(this.logger)))
       .build()

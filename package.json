@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand --collect-coverage",
-    "start": "node --unhandled-rejections=strict dist/app.js"
+    "start": "node --unhandled-rejections=strict dist/app.js",
+    "health-check": "node --unhandled-rejections=strict dist/health-check.js"
   },
   "dependencies": {
     "axios": "^0.24.0",

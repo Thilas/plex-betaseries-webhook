@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import "reflect-metadata"
+import "../../container"
 import { It, Mock, MockBuilder, Times } from "../../../test/moq"
 import { BetaSeries, BetaSeriesMember } from "../../betaseries/betaseries"
 import { ILogger } from "../../logger"

@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../../container"
 import { getLoggerMock } from "../../../test/logger"
 import { Payload } from "../../middlewares/payload"
 import { PlexMovieFactory } from "./movie"
@@ -73,7 +73,7 @@ describe("PlexMovie", () => {
       // act
       const result = movie.toString()
       // assert
-      expect(result).toEqual(`${fakePayload.Metadata.title} (${fakeGuid}@${fakeAgent})`)
+      expect(result).toBe(`${fakePayload.Metadata.title} (${fakeGuid}@${fakeAgent})`)
     })
   })
 })

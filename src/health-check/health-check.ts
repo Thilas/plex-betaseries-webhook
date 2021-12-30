@@ -2,17 +2,16 @@ import { inject, multiInject } from "inversify"
 import { ids, provideSingleton } from "../decorators"
 import { ILogger } from "../logger"
 import { hasMember } from "../utils"
+import { HealthComponent, HealthMeasurements, HealthResponse } from "./models"
 
-// See https://inadarei.github.io/rfc-healthcheck/
-
-@provideSingleton(HealthCheck)
-export class HealthCheck {
+@provideSingleton(HealthCheckManager)
+export class HealthCheckManager {
   constructor(
     @inject(ids.logger) readonly logger: ILogger,
-    @multiInject(ids.healthCheckProvider) readonly healthCheckProviders: IHealthCheckProvider[],
+    @multiInject(ids.healthCheck) readonly healthChecks: IHealthCheck[],
   ) {}
 
-  async get() {
+  async getHealthCheck() {
     try {
       return await this.getResponse()
     } catch (error) {
@@ -22,8 +21,8 @@ export class HealthCheck {
   }
 
   private async getResponse() {
-    const healthCheckPromises = this.healthCheckProviders.map(async (provider) => {
-      return { name: provider.name, component: await this.getComponent(provider) }
+    const healthCheckPromises = this.healthChecks.map(async (healthCheck) => {
+      return { name: healthCheck.name, component: await this.getComponent(healthCheck) }
     })
     const healthChecks = await Promise.all(healthCheckPromises)
 
@@ -44,11 +43,11 @@ export class HealthCheck {
     } as HealthResponse
   }
 
-  private async getComponent(provider: IHealthCheckProvider) {
+  private async getComponent(healthCheck: IHealthCheck) {
     try {
-      return await provider.get()
+      return await healthCheck.invoke()
     } catch (error) {
-      this.logger.error(`Unable to check "${provider.name}":`, error)
+      this.logger.error(`Unable to check "${healthCheck.name}":`, error)
       return {
         componentType: "system",
         output: this.getOutput(error),
@@ -69,37 +68,7 @@ export class HealthCheck {
   }
 }
 
-export interface IHealthCheckProvider {
+export interface IHealthCheck {
   get name(): string
-  get(): Promise<HealthComponent>
+  invoke(): Promise<HealthComponent>
 }
-
-export type HealthResponse = {
-  status: HealthStatus
-  version?: string
-  releaseID?: string
-  notes?: string[]
-  output?: string
-  serviceID?: string
-  description?: string
-  checks?: HealthMeasurements
-  links?: HealthLinks
-}
-
-export type HealthMeasurements = Record<string, HealthComponent[]>
-
-export type HealthComponent = {
-  componentId?: string
-  componentType?: "component" | "datastore" | "system"
-  observedValue?: unknown
-  observedUnit?: string
-  status?: HealthStatus
-  affectedEndpoints?: string[]
-  time?: Date
-  output?: string
-  links?: HealthLinks
-}
-
-export type HealthStatus = "pass" | "fail" | "warn"
-
-export type HealthLinks = Record<string, string>

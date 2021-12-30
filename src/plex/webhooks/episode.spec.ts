@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../../container"
 import { getLoggerMock } from "../../../test/logger"
 import { It, Mock } from "../../../test/moq"
 import { BetaSeriesMember, EpisodeMediaId } from "../../betaseries/betaseries"

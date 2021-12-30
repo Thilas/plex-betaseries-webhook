@@ -1,7 +1,6 @@
-import "reflect-metadata"
-import { IConfig } from "config"
+import "./container"
 import { Mock } from "../test/moq"
-import { Configuration } from "./configuration"
+import { Configuration, IConfig } from "./configuration"
 
 describe("Configuration", () => {
   it("uses default url", () => {

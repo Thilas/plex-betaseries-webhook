@@ -1,49 +1,50 @@
-import "reflect-metadata"
+import "../container"
 import { getLoggerMock } from "../../test/logger"
 import { It, Mock } from "../../test/moq"
-import { HealthCheck, HealthComponent, IHealthCheckProvider } from "./health-check"
+import { HealthCheckManager, IHealthCheck } from "./health-check"
+import { HealthComponent } from "./models"
 
-function setupProvider(name: string, component: HealthComponent) {
-  const provider = new Mock<IHealthCheckProvider>()
+function setupHealthCheck(name: string, component: HealthComponent) {
+  const healthCheck = new Mock<IHealthCheck>()
     .setup((e) => e.name)
     .returns(name)
-    .setup((e) => e.get())
+    .setup((e) => e.invoke())
     .returnsAsync(component)
     .object()
-  return [provider, name, component] as [IHealthCheckProvider, string, HealthComponent]
+  return { healthCheck, name, component }
 }
 
-function setupThrowingProvider(name: string, message: string) {
+function setupThrowingHealthCheck(name: string, message: string) {
   const component = { status: "fail", output: message } as HealthComponent
-  const provider = new Mock<IHealthCheckProvider>()
+  const healthCheck = new Mock<IHealthCheck>()
     .setup((e) => e.name)
     .returns(name)
-    .setup((e) => e.get())
+    .setup((e) => e.invoke())
     .throwsAsync(new Error(message))
     .object()
-  return [provider, name, component] as [IHealthCheckProvider, string, HealthComponent]
+  return { healthCheck, name, component }
 }
 
-describe("HealthCheck", () => {
-  describe("get", () => {
+describe("HealthCheckManager", () => {
+  describe("getHealthCheck", () => {
     const logger = getLoggerMock().object()
     const version = (process.env.npm_package_version = "1.2.3")
 
     it("returns a failing response when there are no health check providers", async () => {
       // arrange
       const error = "fakeError"
-      const providers = new Mock<Array<IHealthCheckProvider>>()
+      const healthChecks = new Mock<Array<IHealthCheck>>()
         .setup(() => It.IsAny())
         .throws(error)
         .object()
       const logger = getLoggerMock({
         builder: (mock, logger) => mock.setup((e) => e.error("Unable to check health:", It.IsAny())).returns(logger),
       }).object()
-      const healthCheck = new HealthCheck(logger, providers)
+      const manager = new HealthCheckManager(logger, healthChecks)
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "fail",
         version: "1",
         releaseID: version,
@@ -53,11 +54,11 @@ describe("HealthCheck", () => {
 
     it("returns a passing response when there are no health check providers", async () => {
       // arrange
-      const healthCheck = new HealthCheck(logger, [])
+      const manager = new HealthCheckManager(logger, [])
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "pass",
         version: "1",
         releaseID: version,
@@ -66,35 +67,35 @@ describe("HealthCheck", () => {
 
     it("returns a passing response when there are health check providers", async () => {
       // arrange
-      const [provider1, name1, component1] = setupProvider("fakeName1", { componentId: "fakeComponent1" })
-      const [provider2, name2, component2] = setupProvider("fakeName2", { componentId: "fakeComponent2" })
-      const healthCheck = new HealthCheck(logger, [provider1, provider2])
+      const hc1 = setupHealthCheck("fakeName1", { componentId: "fakeComponent1" })
+      const hc2 = setupHealthCheck("fakeName2", { componentId: "fakeComponent2" })
+      const manager = new HealthCheckManager(logger, [hc1.healthCheck, hc2.healthCheck])
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "pass",
         version: "1",
         releaseID: version,
       })
-      expect(result.checks).toHaveProperty(name1)
-      expect(result.checks ? result.checks[name1] : undefined).toMatchObject([component1])
-      expect(result.checks).toHaveProperty(name2)
-      expect(result.checks ? result.checks[name2] : undefined).toMatchObject([component2])
+      expect(response.checks).toHaveProperty(hc1.name)
+      expect(response.checks ? response.checks[hc1.name] : undefined).toMatchObject([hc1.component])
+      expect(response.checks).toHaveProperty(hc2.name)
+      expect(response.checks ? response.checks[hc2.name] : undefined).toMatchObject([hc2.component])
     })
 
     it("returns a warning response when one health check provider warns", async () => {
       // arrange
-      const [provider1] = setupProvider("fakeName1", { componentId: "fakeComponent1" })
-      const [provider2] = setupProvider("fakeName2", {
+      const hc1 = setupHealthCheck("fakeName1", { componentId: "fakeComponent1" })
+      const hc2 = setupHealthCheck("fakeName2", {
         status: "warn",
         componentId: "fakeComponent2",
       })
-      const healthCheck = new HealthCheck(logger, [provider1, provider2])
+      const manager = new HealthCheckManager(logger, [hc1.healthCheck, hc2.healthCheck])
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "warn",
         version: "1",
         releaseID: version,
@@ -103,19 +104,19 @@ describe("HealthCheck", () => {
 
     it("returns a failing response when one health check provider fails", async () => {
       // arrange
-      const [provider1] = setupProvider("fakeName1", {
+      const hc1 = setupHealthCheck("fakeName1", {
         status: "warn",
         componentId: "fakeComponent1",
       })
-      const [provider2] = setupProvider("fakeName2", {
+      const hc2 = setupHealthCheck("fakeName2", {
         status: "fail",
         componentId: "fakeComponent2",
       })
-      const healthCheck = new HealthCheck(logger, [provider1, provider2])
+      const manager = new HealthCheckManager(logger, [hc1.healthCheck, hc2.healthCheck])
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "fail",
         version: "1",
         releaseID: version,
@@ -124,25 +125,25 @@ describe("HealthCheck", () => {
 
     it("returns a failing response when one health check provider throws", async () => {
       // arrange
-      const [provider1, name1, component1] = setupThrowingProvider("fakeName1", "fakeError")
-      const [provider2, name2, component2] = setupProvider("fakeName2", { componentId: "fakeComponent2" })
+      const hc1 = setupThrowingHealthCheck("fakeName1", "fakeError")
+      const hc2 = setupHealthCheck("fakeName2", { componentId: "fakeComponent2" })
       const logger = getLoggerMock({
         builder: (mock, logger) =>
-          mock.setup((e) => e.error(`Unable to check "${name1}":`, It.IsAny())).returns(logger),
+          mock.setup((e) => e.error(`Unable to check "${hc1.name}":`, It.IsAny())).returns(logger),
       }).object()
-      const healthCheck = new HealthCheck(logger, [provider1, provider2])
+      const manager = new HealthCheckManager(logger, [hc1.healthCheck, hc2.healthCheck])
       // act
-      const result = await healthCheck.get()
+      const response = await manager.getHealthCheck()
       // assert
-      expect(result).toMatchObject({
+      expect(response).toMatchObject({
         status: "fail",
         version: "1",
         releaseID: version,
       })
-      expect(result.checks).toHaveProperty(name1)
-      expect(result.checks ? result.checks[name1] : undefined).toMatchObject([component1])
-      expect(result.checks).toHaveProperty(name2)
-      expect(result.checks ? result.checks[name2] : undefined).toMatchObject([component2])
+      expect(response.checks).toHaveProperty(hc1.name)
+      expect(response.checks ? response.checks[hc1.name] : undefined).toMatchObject([hc1.component])
+      expect(response.checks).toHaveProperty(hc2.name)
+      expect(response.checks ? response.checks[hc2.name] : undefined).toMatchObject([hc2.component])
     })
   })
 })

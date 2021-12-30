@@ -1,14 +1,15 @@
 import { provide } from "inversify-binding-decorators"
 import { ids } from "../decorators"
-import { HealthComponent, IHealthCheckProvider } from "./health-check"
+import { IHealthCheck } from "./health-check"
+import { HealthComponent } from "./models"
 
-@provide(ids.healthCheckProvider)
-export class UptimeHealthCheckProvider implements IHealthCheckProvider {
+@provide(ids.healthCheck)
+export class UptimeHealthCheck implements IHealthCheck {
   get name() {
     return "uptime"
   }
 
-  async get(): Promise<HealthComponent> {
+  async invoke(): Promise<HealthComponent> {
     return {
       componentType: "system",
       observedValue: process.uptime(),

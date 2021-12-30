@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-import "reflect-metadata"
+import "../container"
 import { NextFunction, Request, Response } from "express"
 import { getLoggerMock } from "../../test/logger"
 import { It, Mock, Times } from "../../test/moq"

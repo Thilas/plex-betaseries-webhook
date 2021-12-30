@@ -1,6 +1,5 @@
-import "reflect-metadata"
-import { injectable } from "inversify"
 import { container } from "./container"
+import { injectable } from "inversify"
 import { getWebhookDefinition, ids } from "./decorators"
 import { MediaId } from "./plex/media/ids"
 import { IMedia, IMediaFactory, IWebhook, MediaFactoryProvider, WebhookProvider } from "./plex/webhooks/manager"

@@ -26,6 +26,15 @@
       },
       "cwd": "${workspaceFolder}",
       "args": ["--runInBand", "--watchAll=false"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch HealthCheck",
+      "preLaunchTask": "Build",
+      "runtimeArgs": ["--unhandled-rejections=strict"],
+      "program": "${workspaceFolder}/src/health-check.ts",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }

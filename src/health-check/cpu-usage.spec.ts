@@ -1,11 +1,11 @@
-import "reflect-metadata"
-import { CpuUsageHealthCheckProvider } from "./cpu-usage"
+import "../container"
+import { CpuUsageHealthCheck } from "./cpu-usage"
 
-describe("CpuUsageHealthCheckProvider", () => {
+describe("CpuUsageHealthCheck", () => {
   describe("name", () => {
     it("returns expected value", async () => {
       // arrange
-      const provider = new CpuUsageHealthCheckProvider()
+      const provider = new CpuUsageHealthCheck()
       // act
       const name = provider.name
       // assert
@@ -13,7 +13,7 @@ describe("CpuUsageHealthCheckProvider", () => {
     })
   })
 
-  describe("get", () => {
+  describe("invoke", () => {
     it("returns cpu usage", async () => {
       // arrange
       const usage1 = { user: 10000, system: 20000 }
@@ -22,9 +22,9 @@ describe("CpuUsageHealthCheckProvider", () => {
       const now2 = 1500
       process.cpuUsage = jest.fn().mockReturnValueOnce(usage1).mockReturnValueOnce(usage2)
       Date.now = jest.fn().mockReturnValueOnce(now1).mockReturnValueOnce(now2)
-      const provider = new CpuUsageHealthCheckProvider()
+      const provider = new CpuUsageHealthCheck()
       // act
-      const result = await provider.get()
+      const result = await provider.invoke()
       // assert
       expect(result).toMatchObject({
         componentType: "system",

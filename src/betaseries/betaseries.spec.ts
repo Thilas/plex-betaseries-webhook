@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../container"
 import MockAdapter from "axios-mock-adapter/types"
 import { AxiosInstanceMock } from "../../test/axios"
 import { getLoggerMock } from "../../test/logger"
@@ -55,11 +55,10 @@ describe("BetaSeries", () => {
       // act
       const authUrl = betaseries.getAuthenticationUrl()
       // assert
-      expect(authUrl).toEqual(
-        `${fakeConfiguration.betaseries.url}/authorize?client_id=${
-          fakeConfiguration.betaseries.client.clientId
-        }&redirect_uri=${encodeURIComponent(fakeConfiguration.server.url)}`,
-      )
+      const bsUrl = fakeConfiguration.betaseries.url
+      const clientId = fakeConfiguration.betaseries.client.clientId
+      const serverUrl = fakeConfiguration.server.url
+      expect(authUrl).toBe(`${bsUrl}/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(serverUrl)}`)
     })
   })
 

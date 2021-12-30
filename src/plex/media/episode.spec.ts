@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../../container"
 import { getLoggerMock } from "../../../test/logger"
 import { Payload } from "../../middlewares/payload"
 import { PlexEpisodeFactory } from "./episode"
@@ -121,7 +121,7 @@ describe("PlexEpisode", () => {
       // act
       const result = episode.toString()
       // assert
-      expect(result).toEqual(
+      expect(result).toBe(
         `${fakePayload.Metadata.grandparentTitle} S0${fakePayload.Metadata.parentIndex}E0${fakePayload.Metadata.index} (${fakeGuid}@${fakeAgent})`,
       )
     })
