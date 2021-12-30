@@ -15,6 +15,15 @@ export function getLoggerMock(args?: { builder?: (mock: IMock<ILogger>, logger: 
     .setup((e) => e.debug(It.IsAny()))
     .returns(fakeLogger)
 
+    .setup((e) => e.error(It.IsAny(), It.IsAny()))
+    .returns(fakeLogger)
+    .setup((e) => e.warn(It.IsAny(), It.IsAny()))
+    .returns(fakeLogger)
+    .setup((e) => e.info(It.IsAny(), It.IsAny()))
+    .returns(fakeLogger)
+    .setup((e) => e.debug(It.IsAny(), It.IsAny()))
+    .returns(fakeLogger)
+
     .setup((e) => e.isErrorEnabled())
     .returns(true)
     .setup((e) => e.isWarnEnabled())

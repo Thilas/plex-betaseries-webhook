@@ -1,11 +1,11 @@
-import "reflect-metadata"
-import { UptimeHealthCheckProvider } from "./uptime"
+import "../container"
+import { UptimeHealthCheck } from "./uptime"
 
-describe("UptimeHealthCheckProvider", () => {
+describe("UptimeHealthCheck", () => {
   describe("name", () => {
     it("returns expected value", async () => {
       // arrange
-      const provider = new UptimeHealthCheckProvider()
+      const provider = new UptimeHealthCheck()
       // act
       const name = provider.name
       // assert
@@ -13,14 +13,14 @@ describe("UptimeHealthCheckProvider", () => {
     })
   })
 
-  describe("get", () => {
+  describe("invoke", () => {
     it("returns cpu usage", async () => {
       // arrange
       const uptime = 1000
       process.uptime = jest.fn().mockReturnValueOnce(uptime)
-      const provider = new UptimeHealthCheckProvider()
+      const provider = new UptimeHealthCheck()
       // act
-      const result = await provider.get()
+      const result = await provider.invoke()
       // assert
       expect(result).toMatchObject({
         componentType: "system",

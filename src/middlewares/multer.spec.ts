@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../container"
 import { NextFunction, Request, RequestHandler, Response } from "express"
 import { It, Mock, Times } from "../../test/moq"
 import { Configuration } from "../configuration"

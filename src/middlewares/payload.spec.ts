@@ -1,8 +1,7 @@
-import "reflect-metadata"
+import { container } from "../container"
 import { NextFunction, Request, Response } from "express"
 import { Mock, Times } from "../../test/moq"
 import { BetaSeriesPrincipal } from "../betaseries/betaseries"
-import { container } from "../container"
 import { ids } from "../decorators"
 import { PayloadMiddleware, PayloadProvider } from "./payload"
 
@@ -27,7 +26,7 @@ describe("PayloadMiddleware", () => {
     // act
     middleware.handler(fakeReq, fakeRes, nextMock.object())
     // assert
-    const payloadPromise = container.get<PayloadProvider>(ids.payloadProvider)()
+    const payloadPromise = httpContext.container.get<PayloadProvider>(ids.payloadProvider)()
     await expect(payloadPromise).rejects.toBe("No payload in this context.")
     nextMock.verify((e) => e(), Times.Once())
   })

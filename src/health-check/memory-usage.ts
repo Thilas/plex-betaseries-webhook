@@ -1,14 +1,15 @@
 import { provide } from "inversify-binding-decorators"
 import { ids } from "../decorators"
-import { HealthComponent, IHealthCheckProvider } from "../health-check/health-check"
+import { IHealthCheck } from "../health-check/health-check"
+import { HealthComponent } from "./models"
 
-@provide(ids.healthCheckProvider)
-export class MemoryUsageHealthCheckProvider implements IHealthCheckProvider {
+@provide(ids.healthCheck)
+export class MemoryUsageHealthCheck implements IHealthCheck {
   get name() {
     return "memory:utilization"
   }
 
-  async get(): Promise<HealthComponent> {
+  async invoke(): Promise<HealthComponent> {
     return {
       componentType: "system",
       observedValue: process.memoryUsage.rss(),

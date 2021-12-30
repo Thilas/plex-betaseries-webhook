@@ -1,15 +1,15 @@
-import "reflect-metadata"
+import { container } from "../container"
 import { interfaces, JsonContent, results, TYPE } from "inversify-express-utils"
 import { Mock, MockBuilder } from "../../test/moq"
-import { container } from "../container"
-import { HealthCheck, HealthResponse } from "../health-check/health-check"
+import { HealthCheckManager } from "../health-check/health-check"
+import { HealthResponse } from "../health-check/models"
 import { HealthCheckController } from "./health-check"
 
-function setup(args: { healthCheckBuilder?: MockBuilder<HealthCheck> }) {
-  const healthCheckMock = new Mock<HealthCheck>({ builder: args.healthCheckBuilder })
+function setup(args: { healthCheckManagerBuilder?: MockBuilder<HealthCheckManager> }) {
+  const healthCheckManagerMock = new Mock<HealthCheckManager>({ builder: args.healthCheckManagerBuilder })
   const httpContextMock = new Mock<interfaces.HttpContext>()
-  container.unbind(HealthCheck)
-  container.bind(HealthCheck).toConstantValue(healthCheckMock.object())
+  container.unbind(HealthCheckManager)
+  container.bind(HealthCheckManager).toConstantValue(healthCheckManagerMock.object())
   container.bind<interfaces.HttpContext>(TYPE.HttpContext).toConstantValue(httpContextMock.object())
   container.bind(HealthCheckController).to(HealthCheckController)
   const controller = container.get(HealthCheckController)
@@ -31,8 +31,8 @@ describe("HealthCheckController", () => {
       // arrange
       const response = { status: "pass" } as HealthResponse
       const controller = setup({
-        healthCheckBuilder: (mock) => {
-          mock.setup((e) => e.get()).returnsAsync(response)
+        healthCheckManagerBuilder: (mock) => {
+          mock.setup((e) => e.getHealthCheck()).returnsAsync(response)
         },
       })
       // act
@@ -53,8 +53,8 @@ describe("HealthCheckController", () => {
     it("returns a 299 status when healthcheck warns", async () => {
       // arrange
       const controller = setup({
-        healthCheckBuilder: (mock) => {
-          mock.setup((e) => e.get()).returnsAsync({ status: "warn" })
+        healthCheckManagerBuilder: (mock) => {
+          mock.setup((e) => e.getHealthCheck()).returnsAsync({ status: "warn" })
         },
       })
       // act
@@ -68,8 +68,8 @@ describe("HealthCheckController", () => {
     it("returns a 503 status when healthcheck fails", async () => {
       // arrange
       const controller = setup({
-        healthCheckBuilder: (mock) => {
-          mock.setup((e) => e.get()).returnsAsync({ status: "fail" })
+        healthCheckManagerBuilder: (mock) => {
+          mock.setup((e) => e.getHealthCheck()).returnsAsync({ status: "fail" })
         },
       })
       // act

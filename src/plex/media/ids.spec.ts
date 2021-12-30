@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../../container"
 import { getLoggerMock } from "../../../test/logger"
 import { Times } from "../../../test/moq"
 import { PayloadGuid } from "../../middlewares/payload"
@@ -86,7 +86,7 @@ describe("formatMediaIds", () => {
     // act
     const result = formatMediaIds([])
     // assert
-    expect(result).toEqual("")
+    expect(result).toBe("")
   })
 
   it("succeeds with one id", () => {
@@ -95,7 +95,7 @@ describe("formatMediaIds", () => {
     // act
     const result = formatMediaIds([a])
     // assert
-    expect(result).toEqual("a@tvdb")
+    expect(result).toBe("a@tvdb")
   })
 
   it("succeeds with multiple ids", () => {
@@ -105,6 +105,6 @@ describe("formatMediaIds", () => {
     // act
     const result = formatMediaIds([a, b, a])
     // assert
-    expect(result).toEqual("a@imdb, b@tmdb, a@imdb")
+    expect(result).toBe("a@imdb, b@tmdb, a@imdb")
   })
 })

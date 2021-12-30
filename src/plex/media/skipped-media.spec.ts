@@ -1,4 +1,4 @@
-import "reflect-metadata"
+import "../../container"
 import { PlexSkippedMediaFactory } from "./skipped-media"
 
 describe("PlexSkippedMediaFactory", () => {

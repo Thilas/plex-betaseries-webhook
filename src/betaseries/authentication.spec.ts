@@ -1,8 +1,7 @@
-import "reflect-metadata"
+import { container } from "../container"
 import { Request } from "express"
 import { interfaces } from "inversify-express-utils"
 import { Mock } from "../../test/moq"
-import { container } from "../container"
 import { BetaSeriesAuthProvider } from "./authentication"
 import { BetaSeries, BetaSeriesPrincipal } from "./betaseries"
 

@@ -1,6 +1,4 @@
-import "reflect-metadata"
-import { container } from "./container"
+import { startProcess } from "./process"
 import { Server } from "./server"
 
-const server = container.get(Server)
-server.listen()
+startProcess(Server)

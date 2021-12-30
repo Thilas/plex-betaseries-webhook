@@ -30,5 +30,5 @@ export const ids = {
   mediaFactory: Symbol.for("MediaFactory"),
   mediaFactoryProvider: Symbol.for("MediaFactoryProvider"),
 
-  healthCheckProvider: Symbol.for("HealthCheckProvider"),
+  healthCheck: Symbol.for("HealthCheck"),
 }
