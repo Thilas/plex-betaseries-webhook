@@ -7,11 +7,9 @@ on:
     types: [published]
 
 env:
-  NODE_VERSION: 14.x
+  NODE_VERSION: 17.x
   SONAR_DIRECTORY: /github/workspace
-  CONTAINER_REGISTRY: docker.pkg.github.com
-  DOCKERHUB_USER: thilas
-  IMAGE_NAME: plex-betaseries-webhook
+  DH_IMAGE: thilas/plex-betaseries-webhook
 
 jobs:
   build:
@@ -23,15 +21,23 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            ${{ github.event_name != 'pull_request' && env.DH_IMAGE || '' }}
+          tags: |
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+
       - name: Bump version
-        if: ${{ !github.base_ref }}
+        if: github.event_name != 'pull_request'
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "$GITHUB_REF" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "$GITHUB_REF" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          echo "VERSION: $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version: $VERSION"
           npm --no-git-tag-version version "$VERSION"
 
       - name: Create SonarCloud scanner default working directory
@@ -52,44 +58,40 @@ jobs:
         working-directory: ${{ env.SONAR_DIRECTORY }} # Align on SonarCloud scanner default working directory
 
       - name: SonarCloud scan
-        continue-on-error: true # Scanning from forks is not supported for now
+        continue-on-error: true # because scanning from forks is not supported for now
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         uses: SonarSource/sonarcloud-github-action@v1.4
         with:
-          args: -Dsonar.projectVersion=${{ env.VERSION }}
+          args: -Dsonar.projectVersion=${{ steps.meta.outputs.version }}
 
-      - name: Build image
-        run: docker build --build-arg "BUILD_DATE=$(date --utc --rfc-3339=seconds)" --build-arg "VERSION=$VERSION" --tag "$IMAGE_NAME" .
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-      - name: Log into GitHub Container Registry
-        if: ${{ !github.base_ref }}
-        env:
-          CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
-        run: echo "$CR_PAT" | docker login "$CONTAINER_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Push image to GitHub Container Registry
-        if: ${{ !github.base_ref }}
-        run: |
-          # Change all uppercase to lowercase
-          IMAGE_ID="$(echo "$CONTAINER_REGISTRY/$GITHUB_REPOSITORY" | tr '[A-Z]' '[a-z]')/$IMAGE_NAME"
-          docker tag "$IMAGE_NAME" "$IMAGE_ID:$VERSION"
-          docker push "$IMAGE_ID:$VERSION"
-          docker tag "$IMAGE_NAME" "$IMAGE_ID:latest"
-          docker push "$IMAGE_ID:latest"
+      #     CR_PAT: ${{ secrets.CR_PAT }} # Secret PAT with `read:packages` and `write:packages` scopes
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log into Docker Hub
-        if: ${{ !github.base_ref }}
-        env:
-          DH_PAT: ${{ secrets.DH_PAT }}
-        run: echo "$DH_PAT" | docker login --username "$DOCKERHUB_USER" --password-stdin
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: thilas
+          password: ${{ secrets.DH_PAT }}
 
-      - name: Push image to Docker Hub
-        if: ${{ !github.base_ref }}
-        run: |
-          IMAGE_ID="$DOCKERHUB_USER/$IMAGE_NAME"
-          docker tag "$IMAGE_NAME" "$IMAGE_ID:$VERSION"
-          docker push "$IMAGE_ID:$VERSION"
-          docker tag "$IMAGE_NAME" "$IMAGE_ID:latest"
-          docker push "$IMAGE_ID:latest"
+      - name: Build and push docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm/v7
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
