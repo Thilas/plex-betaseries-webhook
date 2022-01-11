@@ -48,12 +48,12 @@ services:
 
 | Parameter                        | Description                                                 |
 | -------------------------------- | ----------------------------------------------------------- |
-| `-e SERVER_URL=xxx`              | Public url to access the webhook                            |
+| `-e SERVER_URL=xxx`              | Public HTTPS url to access the webhook                      |
 | `-e BETASERIES_CLIENTID=xxx`     | [BetaSeries](https://www.betaseries.com/api/) client id     |
 | `-e BETASERIES_CLIENTSECRET=xxx` | [BetaSeries](https://www.betaseries.com/api/) client secret |
 | `-p 12000:12000`                 | Plex webhook port                                           |
 
-A public url is expected to be forwarded to the container on the exposed port.
+The public url is expected to be forwarded to the container on the exposed port. And it must be using HTTPS in order to be able to authenticate on Betaseries.
 
 A health check is defined by default in order for docker to monitor the container's health status using the dedicated endpoint: <http://localhost:12000/health>.
 
@@ -64,7 +64,7 @@ In order to configure the Plex webhook, its url must be obtained thanks to the f
 - access the webhook using its public url for a browser
 - after redirection to BetaSeries, log in using your account (if not already done)
 
-The url will look like `<public url>/?accessToken=/xxxxxxxxxxxx` and can be used as a Plex webhook.
+The url will look like `<public url>/?accessToken=xxxxxxxxxxxx` and can be used as a Plex webhook.
 
 ## Support Info
 
