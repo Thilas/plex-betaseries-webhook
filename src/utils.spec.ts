@@ -1,16 +1,26 @@
 import { delay, getFirstSupportedOrDefault, hasMember } from "./utils"
 
 describe("delay", () => {
-  it("returns false if the object doesn't have a specific member", async () => {
+  //#region Timers
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+  //#endregion
+
+  it("waits for the expected time", async () => {
     // arange
-    const ms = 10
-    const start = Date.now()
+    const ms = 10000
+    jest.spyOn(global, "setTimeout")
     // act
-    await delay(ms)
+    const promise = delay(ms)
+    jest.runOnlyPendingTimers()
+    await promise
     // assert
-    const end = Date.now()
-    expect(end - start).toBeGreaterThanOrEqual(ms)
-    expect(end - start).toBeLessThan(10 * ms)
+    expect(setTimeout).toHaveBeenCalledTimes(1)
+    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), ms)
   })
 })
 
