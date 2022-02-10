@@ -25,7 +25,7 @@ export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
         `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(allIds)}`,
       )
     }
-    if (!title || !season || !episode) {
+    if (!title || typeof season === "undefined" || typeof episode === "undefined") {
       throw new Error(
         `Invalid episode: ${title ?? "<unknown title>"} ${formatEpisode(season, episode)} (${id.toString()})`,
       )
