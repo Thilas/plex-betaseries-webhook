@@ -22,7 +22,7 @@
     "md5": "^2.3.0",
     "multer": "^1.4.4",
     "reflect-metadata": "^0.1.13",
-    "winston": "^3.5.1"
+    "winston": "^3.7.1"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.2",
