@@ -1,16 +1,16 @@
 import {
   EqualMatchingInjectorConfig,
-  GetPropertyInteraction,
+  Expression,
+  FunctionExpression,
+  GetPropertyExpression,
   IMock,
   IMockOptions as IMoqOptions,
-  InOperatorInteraction,
-  Interaction,
+  InOperatorExpression,
   It,
-  MethodInteraction,
+  MethodExpression,
   Mock as Moq,
-  NamedMethodInteraction,
-  NewOperatorInteraction,
-  SetPropertyInteraction,
+  NewOperatorExpression,
+  SetPropertyExpression,
 } from "moq.ts"
 
 export { IMock, It, Times } from "moq.ts"
@@ -30,7 +30,7 @@ export class Mock<T> extends Moq<T> {
     super(options)
     if (!options?.loose) {
       this.setup(() => It.IsAny()).callback((i) => {
-        const message = getInteractionErrorMessage(i)
+        const message = getExpressionErrorMessage(i)
         throw new Error(message)
       })
 
@@ -44,33 +44,33 @@ export class Mock<T> extends Moq<T> {
   }
 }
 
-function getInteractionErrorMessage(interaction: Interaction) {
-  if (interaction instanceof NewOperatorInteraction) {
+function getExpressionErrorMessage(interaction: Expression) {
+  if (interaction instanceof NewOperatorExpression) {
     return `Setup is missing for new T(${formatArgs(interaction)})`
   }
-  if (interaction instanceof NamedMethodInteraction) {
+  if (interaction instanceof FunctionExpression) {
     return `Setup is missing for T.${formatName(interaction)}(${formatArgs(interaction)})`
   }
-  if (interaction instanceof GetPropertyInteraction) {
+  if (interaction instanceof GetPropertyExpression) {
     return `Setup is missing: T.${formatName(interaction)}`
   }
-  if (interaction instanceof SetPropertyInteraction) {
+  if (interaction instanceof SetPropertyExpression) {
     return `Setup is missing: T.${formatName(interaction)} = ${formatValue(interaction.value)}`
   }
-  if (interaction instanceof InOperatorInteraction) {
+  if (interaction instanceof InOperatorExpression) {
     return `Setup is missing: ${formatName(interaction)} in T`
   }
-  if (interaction instanceof MethodInteraction) {
+  if (interaction instanceof MethodExpression) {
     return `Setup is missing: T(${formatArgs(interaction)})`
   }
   throw new Error("Unknown interaction type.")
 }
 
-function formatName(interaction: Interaction) {
+function formatName(interaction: Expression) {
   return formatValue(interaction.name)
 }
 
-function formatArgs(interaction: Interaction) {
+function formatArgs(interaction: Expression) {
   return interaction.args?.map(formatValue).join(", ") ?? ""
 }
 
