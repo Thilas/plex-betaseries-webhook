@@ -1,4 +1,4 @@
-import { delay, getFirstSupportedOrDefault, hasMember } from "./utils"
+import { delay, getFirstSupportedOrDefault, hasMember, htmlEncode } from "./utils"
 
 describe("delay", () => {
   //#region Timers
@@ -85,5 +85,19 @@ describe("hasMember", () => {
     // assert
     expect(result).toBeTruthy()
     expect(result ? sut.a : undefined).toEqual(expectedValue)
+  })
+})
+
+describe("htmlEncode", () => {
+  it.each([
+    ["value", "value"],
+    ["va&lue", "va&amp;lue"],
+    ['"value"', "&quot;value&quot;"],
+    ["<value>", "&lt;value&gt;"],
+  ])('encodes "%s" to HTML', (value, expected) => {
+    // act
+    const result = htmlEncode(value)
+    // assert
+    expect(result).toEqual(expected)
   })
 })

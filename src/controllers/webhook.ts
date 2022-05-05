@@ -15,6 +15,7 @@ import { ids } from "../decorators"
 import { MulterMiddleware } from "../middlewares/multer"
 import { PayloadMiddleware, PayloadProvider } from "../middlewares/payload"
 import { WebhookManager } from "../plex/webhooks/manager"
+import { htmlEncode } from "../utils"
 
 @controller("/")
 export class WebhookController extends BaseHttpController {
@@ -63,7 +64,9 @@ export class WebhookController extends BaseHttpController {
   private displayUser(user: BetaSeriesUser) {
     const url = this.getUrlWithAccessToken(user)
     const message = new HttpResponseMessage()
-    message.content = new StringContent(`Plex webhook for ${user.login}: ${url.link(url)}`)
+    message.content = new StringContent(
+      `Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlEncode(url)}</a>`,
+    )
     message.content.headers["content-type"] = "text/html"
     return this.responseMessage(message)
   }
