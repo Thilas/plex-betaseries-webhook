@@ -7,7 +7,7 @@ on:
     types: [published]
 
 env:
-  NODE_VERSION: 17.x
+  NODE_VERSION: 18.x
   SONAR_DIRECTORY: /github/workspace
   DOCKERHUB_USER: thilas
   IMAGE_NAME: plex-betaseries-webhook
