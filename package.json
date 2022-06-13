@@ -25,7 +25,7 @@
     "winston": "^3.7.2"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.2",
+    "@tsconfig/node16": "^1.0.3",
     "@types/config": "^0.0.41",
     "@types/domurl": "^0.0.7",
     "@types/jest": "^27.5.0",
