@@ -45,7 +45,7 @@ jobs:
           sudo mount --bind "$GITHUB_WORKSPACE" "$SONAR_DIRECTORY"
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v3.5.0
+        uses: actions/setup-node@v3.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
