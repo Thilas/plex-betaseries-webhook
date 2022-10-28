@@ -2,7 +2,7 @@ FROM node:alpine
 
 WORKDIR /home/node/app
 COPY . .
-RUN ["npm", "ci", "--production"]
+RUN ["npm", "ci", "--omit=dev"]
 
 EXPOSE 12000
 CMD ["npm", "start"]
