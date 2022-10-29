@@ -95,3 +95,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.actor == github.repository_owner }}
+          buildkitd-flags: --debug
