@@ -11,6 +11,7 @@ env:
   SONAR_DIRECTORY: /github/workspace
   DOCKERHUB_USER: thilas
   IMAGE_NAME: plex-betaseries-webhook
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   build:
@@ -95,4 +96,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           push: ${{ github.actor == github.repository_owner }}
-          buildkitd-flags: --debug
