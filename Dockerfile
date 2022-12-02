@@ -1,8 +1,8 @@
 FROM node:alpine
 
-RUN echo Testzzz
-# WORKDIR /home/node/app
-# COPY . .
+WORKDIR /home/node/app
+COPY . .
+RUN ["npm", "version"]
 # RUN ["npm", "ci", "--omit=dev"]
 
 # EXPOSE 12000
