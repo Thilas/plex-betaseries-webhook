@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:lts-alpine
 RUN which npm && npm version
 
 # WORKDIR /home/node/app
