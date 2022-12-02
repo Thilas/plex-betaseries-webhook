@@ -1,8 +1,8 @@
 FROM node:alpine
+RUN which npm && npm version
 
-WORKDIR /home/node/app
-COPY . .
-RUN ["npm", "version"]
+# WORKDIR /home/node/app
+# COPY . .
 # RUN ["npm", "ci", "--omit=dev"]
 
 # EXPOSE 12000
