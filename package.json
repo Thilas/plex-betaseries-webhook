@@ -25,8 +25,7 @@
     "winston": "^3.8.2"
   },
   "overrides": {
-    "dicer": "0.3.1",
-    "superagent": "8.0.0"
+    "dicer": ">=0.3.1"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",

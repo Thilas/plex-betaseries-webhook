@@ -91,6 +91,7 @@ export class BetaSeries {
 
   private getHeaders(accessToken?: string) {
     const headers = {
+      "Accept-Encoding": "gzip, compress, deflate", // Workaround for https://github.com/axios/axios/issues/5311, "br" is not supported for now
       "X-BetaSeries-Version": this.configuration.betaseries.client.apiVersion,
       "X-BetaSeries-Key": this.configuration.betaseries.client.clientId,
     }
