@@ -28,7 +28,7 @@
     "dicer": ">=0.3.1"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node16": "^1.0.4",
     "@types/config": "^3.3.0",
     "@types/domurl": "^0.0.7",
     "@types/jest": "^29.5.1",
