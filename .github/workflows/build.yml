@@ -2,6 +2,7 @@ name: Build
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize]
     branches: [master]
   release:
     types: [published]
