@@ -64,9 +64,15 @@ export class WebhookController extends BaseHttpController {
   private displayUser(user: BetaSeriesUser) {
     const url = this.getUrlWithAccessToken(user)
     const message = new HttpResponseMessage()
-    message.content = new StringContent(
-      `Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlEncode(url)}</a>`,
-    )
+    message.content = new StringContent(`<html>
+<head>
+<title>Plex Webhook for BetaSeries</title>
+<link rel="icon" type="image/png" href="/favicon.ico">
+</head>
+<body>
+Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlEncode(url)}</a>
+</body>
+</html>`)
     message.content.headers["content-type"] = "text/html"
     return this.responseMessage(message)
   }
