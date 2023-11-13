@@ -34,7 +34,7 @@
     "@types/domurl": "^0.0.7",
     "@types/jest": "^29.5.6",
     "@types/md5": "^2.3.4",
-    "@types/multer": "^1.4.8",
+    "@types/multer": "^1.4.10",
     "@types/node": "^20.8.6",
     "@types/serve-favicon": "^2.5.6",
     "@types/supertest": "^2.0.15",
