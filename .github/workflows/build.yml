@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -47,7 +47,7 @@ jobs:
           sudo mount --bind "$GITHUB_WORKSPACE" "$SONAR_DIRECTORY"
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.0.0
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -63,7 +63,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        uses: SonarSource/sonarcloud-github-action@v1.9
+        uses: SonarSource/sonarcloud-github-action@v2.0.2
         with:
           args: -Dsonar.projectVersion=${{ steps.meta.outputs.version }}
 
