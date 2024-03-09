@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "test": "jest --runInBand --collect-coverage",
+    "test": "jest --runInBand --collect-coverage --debug --verbose",
     "start": "node --unhandled-rejections=strict dist/app.js",
     "health-check": "node --unhandled-rejections=strict dist/health-check.js"
   },
