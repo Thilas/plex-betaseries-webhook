@@ -8,7 +8,7 @@ on:
     types: [published]
 
 env:
-  NODE_VERSION: 18.x # Should match version in Dockerfile
+  NODE_VERSION: 21.x # Should match version in Dockerfile
   SONAR_DIRECTORY: /github/workspace
   DOCKERHUB_USER: thilas
   IMAGE_NAME: plex-betaseries-webhook
