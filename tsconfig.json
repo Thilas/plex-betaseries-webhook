@@ -1,9 +1,10 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "@tsconfig/node21/tsconfig.json",
   "compilerOptions": {
     "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "module": "CommonJS",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
