@@ -42,24 +42,6 @@ describe("HealthCheckClient", () => {
   //#endregion
 
   describe("start", () => {
-    it("succeeds when the server is healthy", async () => {
-      // arrange
-      mockAxiosInstance({ httpStatus: 200, healthStatus: "pass" })
-      // act
-      await client.start()
-      // assert
-      expect(process.exitCode).toBe(0)
-    })
-
-    it("succeeds when the server returns a warning", async () => {
-      // arrange
-      mockAxiosInstance({ httpStatus: 299, healthStatus: "warn" })
-      // act
-      await client.start()
-      // assert
-      expect(process.exitCode).toBe(0)
-    })
-
     it("fails when the server is unhealthy", async () => {
       // arrange
       mockAxiosInstance({ httpStatus: 503, healthStatus: "fail" })
@@ -76,6 +58,24 @@ describe("HealthCheckClient", () => {
       await client.start()
       // assert
       expect(process.exitCode).toBe(1)
+    })
+
+    it("succeeds when the server is healthy", async () => {
+      // arrange
+      mockAxiosInstance({ httpStatus: 200, healthStatus: "pass" })
+      // act
+      await client.start()
+      // assert
+      expect(process.exitCode).toBe(0)
+    })
+
+    it("succeeds when the server returns a warning", async () => {
+      // arrange
+      mockAxiosInstance({ httpStatus: 299, healthStatus: "warn" })
+      // act
+      await client.start()
+      // assert
+      expect(process.exitCode).toBe(0)
     })
   })
 })
