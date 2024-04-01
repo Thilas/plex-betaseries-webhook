@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.3",
-    "@types/config": "^3.3.3",
+    "@types/config": "^3.3.4",
     "@types/domurl": "^0.0.9",
     "@types/jest": "^29.5.12",
     "@types/md5": "^2.3.5",
