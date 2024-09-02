@@ -11,7 +11,7 @@
     "health-check": "node --unhandled-rejections=strict dist/health-check.js"
   },
   "dependencies": {
-    "axios": "^1.7.4",
+    "axios": "^1.7.7",
     "config": "^3.3.12",
     "domurl": "^2.3.4",
     "express": "^4.19.2",
