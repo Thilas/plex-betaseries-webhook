@@ -31,7 +31,7 @@ const fakePrincipal = { accessToken: fakeAccessToken, login: fakeLogin }
 let axiosInstanceMock: AxiosInstanceMock
 const mockAxiosInstanceForMember = (params?: { login?: boolean; builder?: (adapter: MockAdapter) => void }) => {
   axiosInstanceMock.register((adapter) => {
-    const handler = adapter.onGet("members/infos", undefined, fakeAuthorizationHeader)
+    const handler = adapter.onGet("members/infos", { headers: fakeAuthorizationHeader })
     if (params?.login ?? true) handler.replyOnce(200, { member: { login: fakeLogin } })
     else handler.replyOnce(400, { errors: [{ code: 2001, text: "Invalid!" }] })
     if (params?.builder) params.builder(adapter)
@@ -76,7 +76,9 @@ describe("BetaSeries", () => {
               redirect_uri: fakeConfiguration.server.url,
               code: fakeCode,
             },
-            expect.not.objectContaining({ Authorization: expect.anything() }),
+            {
+              headers: expect.not.objectContaining({ Authorization: expect.anything() }),
+            },
           )
           .replyOnce(200, { access_token: fakeAccessToken })
       })
@@ -189,7 +191,7 @@ describe("BetaSeriesMember", () => {
       mockAxiosInstanceForMember({
         builder: (adapter) => {
           adapter
-            .onGet("episodes/display", { thetvdb_id: 123 }, fakeAuthorizationHeader)
+            .onGet("episodes/display", { params: { thetvdb_id: "123" }, headers: fakeAuthorizationHeader })
             .replyOnce(200, { episode: expectedEpisode })
         },
       })
@@ -208,7 +210,7 @@ describe("BetaSeriesMember", () => {
       mockAxiosInstanceForMember({
         builder: (adapter) => {
           adapter
-            .onPost("episodes/watched", { id: 12, bulk: false }, fakeAuthorizationHeader)
+            .onPost("episodes/watched", { id: 12, bulk: false }, { headers: fakeAuthorizationHeader })
             .replyOnce(200, { episode: expectedEpisode })
         },
       })
@@ -227,7 +229,7 @@ describe("BetaSeriesMember", () => {
       mockAxiosInstanceForMember({
         builder: (adapter) => {
           adapter
-            .onGet("movies/movie", { imdb_id: 123 }, fakeAuthorizationHeader)
+            .onGet("movies/movie", { params: { imdb_id: "123" }, headers: fakeAuthorizationHeader })
             .replyOnce(200, { movie: expectedMovie })
         },
       })
@@ -244,7 +246,7 @@ describe("BetaSeriesMember", () => {
       mockAxiosInstanceForMember({
         builder: (adapter) => {
           adapter
-            .onGet("movies/movie", { tmdb_id: 123 }, fakeAuthorizationHeader)
+            .onGet("movies/movie", { params: { tmdb_id: "123" }, headers: fakeAuthorizationHeader })
             .replyOnce(200, { movie: expectedMovie })
         },
       })
@@ -263,7 +265,7 @@ describe("BetaSeriesMember", () => {
       mockAxiosInstanceForMember({
         builder: (adapter) => {
           adapter
-            .onPost("movies/movie", { id: 12, state: BetaSeriesMovieStatus.seen }, fakeAuthorizationHeader)
+            .onPost("movies/movie", { id: 12, state: BetaSeriesMovieStatus.seen }, { headers: fakeAuthorizationHeader })
             .replyOnce(200, { movie: expectedMovie })
         },
       })
