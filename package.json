@@ -38,7 +38,7 @@
     "@types/node": "^22.13.4",
     "@types/serve-favicon": "^2.5.7",
     "@types/supertest": "^6.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^9.21.0",
