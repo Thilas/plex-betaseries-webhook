@@ -15,7 +15,7 @@
     "config": "^3.3.12",
     "domurl": "^2.3.4",
     "express": "^4.21.2",
-    "inversify": "^6.2.2",
+    "inversify": "^7.1.0",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.4.6",
     "js-yaml": "^4.1.0",
