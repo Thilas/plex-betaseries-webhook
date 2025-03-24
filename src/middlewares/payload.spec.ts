@@ -27,7 +27,7 @@ describe("PayloadMiddleware", () => {
     middleware.handler(fakeReq, fakeRes, nextMock.object())
     // assert
     const payloadPromise = httpContext.container.get<PayloadProvider>(ids.payloadProvider)()
-    await expect(payloadPromise).rejects.toBe("No payload in this context.")
+    await expect(payloadPromise).rejects.toEqual(new Error("No payload in this context."))
     nextMock.verify((e) => e(), Times.Once())
   })
 
