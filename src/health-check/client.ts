@@ -16,7 +16,7 @@ enum HealthStatus {
 export class HealthCheckClient implements IProcess {
   constructor(@inject(ids.logger) readonly logger: ILogger, readonly configuration: Configuration) {}
 
-  async start() {
+  public async start() {
     try {
       const response = await this.getHealthCheck()
       if (response.data.status === "fail") {
