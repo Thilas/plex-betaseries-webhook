@@ -47,7 +47,7 @@ describe("HealthCheckController", () => {
         "cache-control": "max-age=3600",
       })
       const content = message.content as JsonContent
-      await expect(content.readAsStringAsync()).resolves.toBe(JSON.stringify(response))
+      await expect(content.readAsync()).resolves.toBe(response)
     })
 
     it("returns a 299 status when healthcheck warns", async () => {
