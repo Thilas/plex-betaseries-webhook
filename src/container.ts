@@ -25,7 +25,7 @@ const containerModule = new ContainerModule((bind) => {
   bind<IMulterFactory>(ids.multerFactory).toDynamicValue(getMulterFactory).inSingletonScope()
 
   bind<PayloadProvider>(ids.payloadProvider).toProvider(() => {
-    return () => Promise.reject("No payload in this context.")
+    return () => Promise.reject(new Error("No payload in this context."))
   })
 
   bind<WebhookProvider>(ids.webhookProvider).toProvider((context) => {

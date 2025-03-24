@@ -13,10 +13,10 @@ export function getLogger(): ILogger {
 }
 
 export interface ILogger {
-  error: ILogMethod
-  warn: ILogMethod
-  info: ILogMethod
-  debug: ILogMethod
+  error: LogMethod
+  warn: LogMethod
+  info: LogMethod
+  debug: LogMethod
 
   isErrorEnabled(): boolean
   isWarnEnabled(): boolean
@@ -24,6 +24,4 @@ export interface ILogger {
   isDebugEnabled(): boolean
 }
 
-export interface ILogMethod {
-  (message: string, ...meta: unknown[]): ILogger
-}
+export type LogMethod = (message: string, ...meta: unknown[]) => ILogger
