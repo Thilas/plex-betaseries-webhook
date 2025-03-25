@@ -18,7 +18,7 @@ describe("process", () => {
     @injectable()
     class TestProcess implements IProcess {
       start() {
-        throw new Error(startError)
+        return Promise.reject<void>(new Error(startError))
       }
     }
 
@@ -28,7 +28,7 @@ describe("process", () => {
       // act
       const lambda = () => startProcess(TestProcess)
       // assert
-      expect(lambda).toThrow(startError)
+      expect(lambda).rejects.toEqual(new Error(startError))
     })
   })
 })
