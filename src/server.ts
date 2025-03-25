@@ -18,13 +18,14 @@ export class Server implements IProcess {
   ) {}
 
   start() {
-    new InversifyExpressServer(this.container, null, null, null, BetaSeriesAuthProvider)
-      .setErrorConfig((app) => app.use(getErrorHandler(this.logger)))
-      .setConfig((app) => app.use(favicon(path.join(__dirname, "..", "images", "favicon.png"))))
-      .build()
-      .listen(this.configuration.server.port)
-      .on("listening", () => {
-        this.logger.info(`Server running at ${this.configuration.server.url}`)
-      })
+    return new Promise<void>((resolve) => {
+      new InversifyExpressServer(this.container, null, null, null, BetaSeriesAuthProvider)
+        .setErrorConfig((app) => app.use(getErrorHandler(this.logger)))
+        .setConfig((app) => app.use(favicon(path.join(__dirname, "..", "images", "favicon.png"))))
+        .build()
+        .listen(this.configuration.server.port)
+        .on("listening", () => this.logger.info(`Server running at ${this.configuration.server.url}`))
+        .on("close", () => resolve())
+    })
   }
 }
