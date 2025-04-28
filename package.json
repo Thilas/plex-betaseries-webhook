@@ -35,7 +35,7 @@
     "@types/jest": "^29.5.14",
     "@types/md5": "^2.3.5",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.3",
     "@types/serve-favicon": "^2.5.7",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
