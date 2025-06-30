@@ -22,7 +22,7 @@
     "md5": "^2.3.0",
     "multer": "^2.0.1",
     "reflect-metadata": "^0.2.2",
-    "serve-favicon": "^2.5.0",
+    "serve-favicon": "^2.5.1",
     "winston": "^3.17.0"
   },
   "overrides": {
