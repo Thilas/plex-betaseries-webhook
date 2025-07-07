@@ -44,7 +44,7 @@
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-jest": "^28.13.0",
-    "jest": "^30.0.3",
+    "jest": "^30.0.4",
     "jest-sonar-reporter": "^2.0.0",
     "moq.ts": "^10.0.8",
     "prettier": "^3.6.2",
