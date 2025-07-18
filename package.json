@@ -20,7 +20,7 @@
     "inversify-express-utils": "^6.5.0",
     "js-yaml": "^4.1.0",
     "md5": "^2.3.0",
-    "multer": "^2.0.1",
+    "multer": "^2.0.2",
     "reflect-metadata": "^0.2.2",
     "serve-favicon": "^2.5.1",
     "winston": "^3.17.0"
