@@ -6,6 +6,7 @@ import { ILogger } from "../../logger"
 import { Payload } from "../../middlewares/payload"
 import { NewReturnType } from "../../utils"
 import { MediaId } from "../media/ids"
+import { ClientConfiguration } from "../../configuration"
 
 @provide(WebhookManager)
 export class WebhookManager {
@@ -16,7 +17,12 @@ export class WebhookManager {
     readonly betaseries: BetaSeries,
   ) {}
 
-  async process(payload: Payload, user: BetaSeriesUser) {
+  async process(clientConfiguration: ClientConfiguration, payload: Payload, user: BetaSeriesUser) {
+    const account = payload.Account?.title
+    if (!account || account.localeCompare(clientConfiguration.plexAccount, undefined, { sensitivity: "accent" }) != 0) {
+      return
+    }
+
     const type = payload.Metadata?.type
     if (!type) {
       return
@@ -36,7 +42,7 @@ export class WebhookManager {
       return
     }
 
-    const member = await this.betaseries.getMember(user)
+    const member = await this.betaseries.getMember(clientConfiguration, user)
     await webhook.process(payload, member, this.getInfoLogMethod(payload))
   }
 

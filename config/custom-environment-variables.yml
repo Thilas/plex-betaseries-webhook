@@ -4,7 +4,11 @@ server:
   temp: SERVER_TEMP
 
 betaseries:
+  timeoutInSeconds: BETASERIES_TIMEOUT
   client:
-    timeoutInSeconds: BETASERIES_TIMEOUT
+    plexAccount: PLEX_ACCOUNT
     clientId: BETASERIES_CLIENTID
     clientSecret: BETASERIES_CLIENTSECRET
+  clients:
+    __name: BETASERIES_CLIENTS
+    __format: yml

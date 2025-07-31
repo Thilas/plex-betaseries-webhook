@@ -5,7 +5,7 @@ const createInstance = axios.create
 
 export class AxiosInstanceMock {
   readonly #createMock = (axios.create = jest.fn<AxiosInstance, [AxiosRequestConfig]>(() => {
-    throw new Error("Missing mock")
+    throw new Error("Missing mock.")
   }))
 
   register(builder?: (adapter: MockAdapter) => void) {

@@ -6,6 +6,10 @@ import { BetaSeries, BetaSeriesPrincipal } from "./betaseries"
 import { BetaSeriesMovieStatus } from "./models"
 
 const fakeLogger = getLoggerMock().object()
+const fakeConfigurationClientConfiguration = {
+  clientId: "fakeClientId",
+  clientSecret: "fakeClientSecret",
+}
 const fakeConfiguration = {
   server: {
     url: "http://fake.self.url",
@@ -13,14 +17,17 @@ const fakeConfiguration = {
   },
   betaseries: {
     url: "http://fake.url",
-    client: {
-      url: "http://fake.api.url",
-      apiVersion: "version",
-      timeoutInSeconds: 1,
-      clientId: "fakeClientId",
-      clientSecret: "fakeClientSecret",
+    apiUrl: "http://fake.api.url",
+    apiVersion: "version",
+    timeoutInSeconds: 1,
+    clients: {
+      fakePlexAccount: fakeConfigurationClientConfiguration,
     },
   },
+}
+const fakeClientConfiguration = {
+  ...fakeConfigurationClientConfiguration,
+  plexAccount: "fakePlexAccount",
 }
 const fakeAccessToken = "fakeAccessToken"
 const fakeAuthorizationHeader = expect.objectContaining({ Authorization: `Bearer ${fakeAccessToken}` })
@@ -50,15 +57,26 @@ describe("BetaSeries", () => {
   })
   //#endregion
 
+  describe("getRedirectUrl", () => {
+    it("succeeds", () => {
+      // act
+      const redirectUrl = betaseries.getRedirectUrl(fakeClientConfiguration)
+      // assert
+      const serverUrl = fakeConfiguration.server.url
+      const plexAccount = fakeClientConfiguration.plexAccount
+      expect(redirectUrl).toBe(`${serverUrl}/?plexAccount=${encodeURIComponent(plexAccount)}`)
+    })
+  })
+
   describe("getAuthenticationUrl", () => {
     it("succeeds", () => {
       // act
-      const authUrl = betaseries.getAuthenticationUrl()
+      const authUrl = betaseries.getAuthenticationUrl(fakeClientConfiguration)
       // assert
       const bsUrl = fakeConfiguration.betaseries.url
-      const clientId = fakeConfiguration.betaseries.client.clientId
-      const serverUrl = fakeConfiguration.server.url
-      expect(authUrl).toBe(`${bsUrl}/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(serverUrl)}`)
+      const clientId = fakeClientConfiguration.clientId
+      const redirectUrl = betaseries.getRedirectUrl(fakeClientConfiguration)
+      expect(authUrl).toBe(`${bsUrl}/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUrl)}`)
     })
   })
 
@@ -71,9 +89,9 @@ describe("BetaSeries", () => {
           .onPost(
             "oauth/access_token",
             {
-              client_id: fakeConfiguration.betaseries.client.clientId,
-              client_secret: fakeConfiguration.betaseries.client.clientSecret,
-              redirect_uri: fakeConfiguration.server.url,
+              client_id: fakeClientConfiguration.clientId,
+              client_secret: fakeClientConfiguration.clientSecret,
+              redirect_uri: betaseries.getRedirectUrl(fakeClientConfiguration),
               code: fakeCode,
             },
             {
@@ -84,37 +102,48 @@ describe("BetaSeries", () => {
       })
       mockAxiosInstanceForMember()
       // act
-      const user = await betaseries.getUser(fakeCode)
+      const user = await betaseries.getUser(fakeClientConfiguration, fakeCode)
       // assert
       expect(user).toEqual(fakeUser)
     })
   })
 
   describe("getPrincipal", () => {
-    it("succeeds if empty access token", async () => {
+    it("succeeds if empty plex account", async () => {
       // act
       const principal = await betaseries.getPrincipal("")
       // assert
       expect(principal.details).toBeUndefined()
     })
 
-    it("fails if invalid access token", async () => {
+    it("succeeds if invalid plex account", async () => {
+      // act
+      const principal = await betaseries.getPrincipal("invalid")
+      // assert
+      expect(principal.details).toBeUndefined()
+    })
+
+    it("succeeds if empty access token", async () => {
+      // act
+      const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, "")
+      // assert
+      expect(principal.details).toBeUndefined()
+    })
+
+    it("succeeds if invalid access token", async () => {
       // arrange
       mockAxiosInstanceForMember({ login: false })
       // act
-      const principalPromise = betaseries.getPrincipal(fakeAccessToken)
+      const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, fakeAccessToken)
       // assert
-      await expect(principalPromise).rejects.toHaveProperty(
-        "message",
-        "Request failed with status code 400\n- [2001] Invalid!",
-      )
+      expect(principal.details).toBeUndefined()
     })
 
     it("succeeds if valid access token", async () => {
       // arrange
       mockAxiosInstanceForMember()
       // act
-      const principal = await betaseries.getPrincipal(fakeAccessToken)
+      const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, fakeAccessToken)
       // assert
       expect(principal.details).toEqual(fakePrincipal)
     })
@@ -123,7 +152,7 @@ describe("BetaSeries", () => {
   describe("getMember", () => {
     it("fails if empty access token", async () => {
       // act
-      const principalPromise = betaseries.getMember({ accessToken: "", login: "" })
+      const principalPromise = betaseries.getMember(fakeClientConfiguration, { accessToken: "", login: "" })
       // assert
       await expect(principalPromise).rejects.toEqual(new Error("Empty access token"))
     })
@@ -143,7 +172,7 @@ describe("BetaSeriesPrincipal", () => {
 
     it("returns true when authenticated", async () => {
       // arrange
-      const principal = new BetaSeriesPrincipal(fakeUser)
+      const principal = new BetaSeriesPrincipal(fakeClientConfiguration, fakeUser)
       // act
       const result = await principal.isAuthenticated()
       // assert
@@ -195,7 +224,7 @@ describe("BetaSeriesMember", () => {
             .replyOnce(200, { episode: expectedEpisode })
         },
       })
-      const member = await betaseries.getMember(fakeUser)
+      const member = await betaseries.getMember(fakeClientConfiguration, fakeUser)
       // act
       const episode = await member.getEpisode({ id: { kind: "tvdb", value: "123" } })
       // assert
@@ -214,7 +243,7 @@ describe("BetaSeriesMember", () => {
             .replyOnce(200, { episode: expectedEpisode })
         },
       })
-      const member = await betaseries.getMember(fakePrincipal)
+      const member = await betaseries.getMember(fakeClientConfiguration, fakePrincipal)
       // act
       const episode = await member.markEpisodeAsWatched({ id: 12, bulk: false })
       // assert
@@ -233,7 +262,7 @@ describe("BetaSeriesMember", () => {
             .replyOnce(200, { movie: expectedMovie })
         },
       })
-      const member = await betaseries.getMember(fakePrincipal)
+      const member = await betaseries.getMember(fakeClientConfiguration, fakePrincipal)
       // act
       const movie = await member.getMovie({ id: { kind: "imdb", value: "123" } })
       // assert
@@ -250,7 +279,7 @@ describe("BetaSeriesMember", () => {
             .replyOnce(200, { movie: expectedMovie })
         },
       })
-      const member = await betaseries.getMember(fakePrincipal)
+      const member = await betaseries.getMember(fakeClientConfiguration, fakePrincipal)
       // act
       const movie = await member.getMovie({ id: { kind: "tmdb", value: "123" } })
       // assert
@@ -269,7 +298,7 @@ describe("BetaSeriesMember", () => {
             .replyOnce(200, { movie: expectedMovie })
         },
       })
-      const member = await betaseries.getMember(fakePrincipal)
+      const member = await betaseries.getMember(fakeClientConfiguration, fakePrincipal)
       // act
       const movie = await member.updateMovie({ id: 12, state: BetaSeriesMovieStatus.seen })
       // assert

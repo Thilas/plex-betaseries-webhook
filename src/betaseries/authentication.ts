@@ -8,10 +8,14 @@ export class BetaSeriesAuthProvider implements interfaces.AuthProvider {
   @inject(BetaSeries) readonly betaseries: BetaSeries
 
   async getUser(req: Request) {
-    const accessToken = req.query["accessToken"]
-    if (typeof accessToken !== "string") {
+    const plexAccount = req.query["plexAccount"]
+    if (typeof plexAccount !== "string") {
       return this.betaseries.getPrincipal()
     }
-    return this.betaseries.getPrincipal(accessToken)
+    const accessToken = req.query["accessToken"]
+    if (typeof accessToken !== "string") {
+      return this.betaseries.getPrincipal(plexAccount)
+    }
+    return this.betaseries.getPrincipal(plexAccount, accessToken)
   }
 }

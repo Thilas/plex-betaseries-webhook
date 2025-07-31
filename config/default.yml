@@ -5,9 +5,14 @@ server:
 
 betaseries:
   url: https://www.betaseries.com/
-  client:
-    url: https://api.betaseries.com/
-    apiVersion: '3.0'
-    timeoutInSeconds: 10
-    # clientId: ''
-    # clientSecret: ''
+  apiUrl: https://api.betaseries.com/
+  apiVersion: '3.0'
+  timeoutInSeconds: 10
+  # client:
+  #   plexAccount: ''
+  #   clientId: ''
+  #   clientSecret: ''
+  # clients:
+  #   {plexAccount}:
+  #     clientId: ''
+  #     clientSecret: ''

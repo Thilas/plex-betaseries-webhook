@@ -1,6 +1,12 @@
 import "./container"
 import { Mock } from "../test/moq"
-import { Configuration, IConfig } from "./configuration"
+import {
+  BetaSeriesConfiguration,
+  ClientConfiguration,
+  Configuration,
+  getClientConfiguration,
+  IConfig,
+} from "./configuration"
 
 describe("Configuration", () => {
   it("uses default url", () => {
@@ -70,5 +76,96 @@ describe("Configuration", () => {
       url: "http://localhost/",
       port: 80,
     })
+  })
+})
+
+describe("ClientConfiguration", () => {
+  const fakePlexAccount = "fakePlexAccount"
+  const fakeClientConfiguration = { plexAccount: fakePlexAccount, clientId: "1" } as ClientConfiguration
+  const similarClientConfiguration = { plexAccount: fakePlexAccount, clientId: "2" } as ClientConfiguration
+  const otherClientConfiguration = { plexAccount: "other" } as ClientConfiguration
+
+  it("returns from client (clients not defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(fakeClientConfiguration)
+      .setup((e) => e.clients)
+      .returns(undefined)
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toEqual(fakeClientConfiguration)
+  })
+
+  it("returns from client (clients defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(fakeClientConfiguration)
+      .setup((e) => e.clients)
+      .returns({ fakePlexAccount: similarClientConfiguration })
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toEqual(fakeClientConfiguration)
+  })
+
+  it("returns from clients (client not defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(undefined)
+      .setup((e) => e.clients)
+      .returns({ fakePlexAccount: fakeClientConfiguration })
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toEqual(fakeClientConfiguration)
+  })
+
+  it("returns from clients (client defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(otherClientConfiguration)
+      .setup((e) => e.clients)
+      .returns({ fakePlexAccount: fakeClientConfiguration })
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toEqual(fakeClientConfiguration)
+  })
+
+  it("returns nothing (client and clients not defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(undefined)
+      .setup((e) => e.clients)
+      .returns(undefined)
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toBeUndefined()
+  })
+
+  it("returns nothing (client and clients defined)", () => {
+    // arrange
+    const fakeBetaSeries = new Mock<BetaSeriesConfiguration>()
+      .setup((e) => e.client)
+      .returns(otherClientConfiguration)
+      .setup((e) => e.clients)
+      .returns({ other: otherClientConfiguration })
+      .object()
+    // act
+    const clientConfiguration = getClientConfiguration(fakeBetaSeries, fakePlexAccount)
+    // assert
+    expect(clientConfiguration).toBeUndefined()
   })
 })

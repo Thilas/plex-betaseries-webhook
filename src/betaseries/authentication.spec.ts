@@ -17,7 +17,7 @@ describe("BetaSeriesAuthProvider", () => {
   })
   //#endregion
 
-  it("returns an unauthenticated principal if no access token", async () => {
+  it("returns an unauthenticated principal if no plex account", async () => {
     // arrange
     const fakeBetaseries = new Mock<BetaSeries>()
       .setup((e) => e.getPrincipal())
@@ -25,6 +25,27 @@ describe("BetaSeriesAuthProvider", () => {
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
     const fakeReq = new Mock<Request>()
+      .setup((e) => e.query["plexAccount"])
+      .returns(undefined)
+      .object()
+    const authProvider = container.get(BetaSeriesAuthProvider)
+    // act
+    const user = await authProvider.getUser(fakeReq)
+    // assert
+    expect(await user.isAuthenticated()).toBeFalsy()
+  })
+
+  it("returns an unauthenticated principal if no access token", async () => {
+    // arrange
+    const fakePlexAccount = "fakePlexAccount"
+    const fakeBetaseries = new Mock<BetaSeries>()
+      .setup((e) => e.getPrincipal(fakePlexAccount))
+      .returnsAsync(new BetaSeriesPrincipal())
+      .object()
+    container.bind(BetaSeries).toConstantValue(fakeBetaseries)
+    const fakeReq = new Mock<Request>()
+      .setup((e) => e.query["plexAccount"])
+      .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(undefined)
       .object()
@@ -37,12 +58,15 @@ describe("BetaSeriesAuthProvider", () => {
 
   it("returns an unauthenticated principal if invalid access token", async () => {
     // arrange
+    const fakePlexAccount = "fakePlexAccount"
     const fakeBetaseries = new Mock<BetaSeries>()
-      .setup((e) => e.getPrincipal())
+      .setup((e) => e.getPrincipal(fakePlexAccount))
       .returnsAsync(new BetaSeriesPrincipal())
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
     const fakeReq = new Mock<Request>()
+      .setup((e) => e.query["plexAccount"])
+      .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(["invalid"])
       .object()
@@ -55,18 +79,28 @@ describe("BetaSeriesAuthProvider", () => {
 
   it("returns an authenticated principal if valid access token", async () => {
     // arrange
+    const fakePlexAccount = "fakePlexAccount"
     const fakeAccessToken = "valid"
     const fakeBetaseries = new Mock<BetaSeries>()
-      .setup((e) => e.getPrincipal(fakeAccessToken))
+      .setup((e) => e.getPrincipal(fakePlexAccount, fakeAccessToken))
       .returnsAsync(
-        new BetaSeriesPrincipal({
-          accessToken: fakeAccessToken,
-          login: "fakeLogin",
-        }),
+        new BetaSeriesPrincipal(
+          {
+            plexAccount: fakePlexAccount,
+            clientId: "fakeClientId",
+            clientSecret: "fakeClientSecret",
+          },
+          {
+            accessToken: fakeAccessToken,
+            login: "fakeLogin",
+          },
+        ),
       )
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
     const fakeReq = new Mock<Request>()
+      .setup((e) => e.query["plexAccount"])
+      .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(fakeAccessToken)
       .object()

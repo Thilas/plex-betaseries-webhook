@@ -6,8 +6,14 @@ import { ILogger } from "../../logger"
 import { Payload } from "../../middlewares/payload"
 import { MediaId } from "../media/ids"
 import { IMedia, IMediaFactory, IWebhook, MediaFactoryProvider, WebhookManager, WebhookProvider } from "./manager"
+import { ClientConfiguration } from "../../configuration"
 
-const fakePayload = { event: "fakeEvent", Metadata: { type: "fakeType" } } as Payload
+const fakeClientConfiguration = { plexAccount: "fakePlexAccount" } as ClientConfiguration
+const fakePayload = {
+  Account: { title: fakeClientConfiguration.plexAccount },
+  event: "fakeEvent",
+  Metadata: { type: "fakeType" },
+} as Payload
 const fakeMedia = "fakeMedia"
 const fakeBetaSeriesUser = { accessToken: "fakeAccessToken", login: "fakeLogin" }
 const fakeBetaSeriesMember = { login: fakeBetaSeriesUser.login } as BetaSeriesMember
@@ -37,7 +43,9 @@ function setup(args: {
       if (!args.anyWebhook) {
         return
       }
-      betaSeriesMock.setup((e) => e.getMember(fakeBetaSeriesUser)).returnsAsync(fakeBetaSeriesMember)
+      betaSeriesMock
+        .setup((e) => e.getMember(fakeClientConfiguration, fakeBetaSeriesUser))
+        .returnsAsync(fakeBetaSeriesMember)
       return (
         new Mock<IWebhook>()
           .setup((e) => e.process(payload, fakeBetaSeriesMember, It.IsAny()))
@@ -83,19 +91,35 @@ function setup(args: {
 }
 
 describe("Webhook", () => {
-  it("does nothing if payload has no type", async () => {
+  it("does nothing if payload has no account", async () => {
     // arrange
     const fakePayload = {} as Payload
     const { webhookManager } = setup({ payload: fakePayload })
     // act
-    await webhookManager.process(fakePayload, fakeBetaSeriesUser)
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
+  })
+
+  it("does nothing if payload account doesn't match client configuration", async () => {
+    // arrange
+    const fakePayload = { Account: { title: "otherAccount" } } as Payload
+    const { webhookManager } = setup({ payload: fakePayload })
+    // act
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
+  })
+
+  it("does nothing if payload has no type", async () => {
+    // arrange
+    const fakePayload = { Account: { title: "fakePlexAccount" } } as Payload
+    const { webhookManager } = setup({ payload: fakePayload })
+    // act
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
   })
 
   it("logs the event if payload type is unknown", async () => {
     // arrange
     const { webhookManager, loggerMock, expectedLog } = setup({ media: "<unknown type>", anyLogs: true })
     // act
-    await webhookManager.process(fakePayload, fakeBetaSeriesUser)
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
     // assert
     loggerMock.verify((e) => e.info(expectedLog), Times.Once())
   })
@@ -104,7 +128,7 @@ describe("Webhook", () => {
     // arrange
     const { webhookManager } = setup({ anyMediaFactory: true })
     // act
-    await webhookManager.process(fakePayload, fakeBetaSeriesUser)
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
   })
 
   it("logs something if there is no webhook", async () => {
@@ -115,7 +139,7 @@ describe("Webhook", () => {
       anyMediaFactory: true,
     })
     // act
-    await webhookManager.process(fakePayload, fakeBetaSeriesUser)
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
     // assert
     loggerMock.verify((e) => e.info(expectedLog), Times.Once())
   })
@@ -124,7 +148,26 @@ describe("Webhook", () => {
     // arrange
     const { webhookManager, loggerMock, expectedLog } = setup({ anyLogs: true, anyWebhook: true })
     // act
-    await webhookManager.process(fakePayload, fakeBetaSeriesUser)
+    await webhookManager.process(fakeClientConfiguration, fakePayload, fakeBetaSeriesUser)
+    // assert
+    loggerMock.verify((e) => e.info(expectedLog), Times.Once())
+  })
+
+  it("ignores case of plex account", async () => {
+    // arrange
+    const fakeClientConfiguration = { plexAccount: "FakePlexAccount" } as ClientConfiguration
+    const { webhookManager, loggerMock, expectedLog } = setup({
+      anyLogs: true,
+      anyWebhook: true,
+      betaSeriesBuilder: (mock) =>
+        mock.setup((e) => e.getMember(fakeClientConfiguration, fakeBetaSeriesUser)).returnsAsync(fakeBetaSeriesMember),
+    })
+    // act
+    await webhookManager.process(
+      { plexAccount: "FakePlexAccount" } as ClientConfiguration,
+      fakePayload,
+      fakeBetaSeriesUser,
+    )
     // assert
     loggerMock.verify((e) => e.info(expectedLog), Times.Once())
   })

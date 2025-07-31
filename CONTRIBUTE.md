@@ -43,6 +43,7 @@ ngrok http 12000
 # Test the new docker image interactively
 docker run -it --rm --name plex-betaseries-webhook \
   -e SERVER_URL=https://xxxxxxxxxxxx.ngrok.io \
+  -e PLEX_ACCOUNT=xxxxxxxxxxxx \
   -e BETASERIES_CLIENTID=xxxxxxxxxxxx \
   -e BETASERIES_CLIENTSECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
   -p 12000:12000 plex-betaseries-webhook

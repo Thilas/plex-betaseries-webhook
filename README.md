@@ -19,6 +19,7 @@ docker create \
   --name=plex-betaseries-webhook \
   -h plex-betaseries-webhook \
   -e SERVER_URL=https://my.plex.webhook \
+  -e PLEX_ACCOUNT=xxxxxxxxxxxx \
   -e BETASERIES_CLIENTID=xxxxxxxxxxxx \
   -e BETASERIES_CLIENTSECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
   -p 12000:12000 \
@@ -37,6 +38,7 @@ services:
     hostname: plex-betaseries-webhook
     environment:
       - SERVER_URL=https://my.plex.webhook
+      - PLEX_ACCOUNT=xxxxxxxxxxxx
       - BETASERIES_CLIENTID=xxxxxxxxxxxx
       - BETASERIES_CLIENTSECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     ports:
@@ -49,6 +51,7 @@ services:
 | Parameter                        | Description                                                 |
 | -------------------------------- | ----------------------------------------------------------- |
 | `-e SERVER_URL=xxx`              | Public HTTPS url to access the webhook                      |
+| `-e PLEX_ACCOUNT=xxx`            | Plex account                                                |
 | `-e BETASERIES_CLIENTID=xxx`     | [BetaSeries](https://www.betaseries.com/api/) client id     |
 | `-e BETASERIES_CLIENTSECRET=xxx` | [BetaSeries](https://www.betaseries.com/api/) client secret |
 | `-p 12000:12000`                 | Plex webhook port                                           |
