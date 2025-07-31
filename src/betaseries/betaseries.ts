@@ -66,7 +66,7 @@ export class BetaSeries {
       this.logger.info(`Access token of ${login} checked`)
       return new BetaSeriesPrincipal(clientConfiguration, { accessToken, login })
     } catch (error) {
-      this.logger.debug("Invalid access token")
+      this.logger.debug("Invalid access token", error)
       return new BetaSeriesPrincipal(clientConfiguration)
     }
   }

@@ -18,7 +18,7 @@ describe("MulterMiddleware", () => {
     const fakeReq = new Mock<Request>().object()
     const fakeRes = new Mock<Response>().object()
     const fakeNext = new Mock<NextFunction>().object()
-    const multerHandlerMock = new Mock<RequestHandler>().setup((e) => e(fakeReq, fakeRes, fakeNext)).returns()
+    const multerHandlerMock = new Mock<RequestHandler>().setup((e) => e(fakeReq, fakeRes, fakeNext)).returns(undefined)
     const fakeMulterFactory = new Mock<IMulterFactory>()
       .setup((e) => e(It.Is<MulterFactoryParameters>((p) => p?.dest === fakeConfiguration.server.temp)))
       .returns(
