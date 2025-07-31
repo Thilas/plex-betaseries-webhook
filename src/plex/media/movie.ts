@@ -19,10 +19,10 @@ export class PlexMovieFactory implements IMediaFactory<MovieMediaId> {
     const id = getFirstSupportedOrDefault(allIds, [ImdbId, TmdbId])
     const title = payload.Metadata?.title
     if (!id) {
-      throw new Error(`Unsupported movie id for ${title}: ${formatMediaIds(allIds)}`)
+      throw new Error(`Unsupported movie id for ${title}: ${formatMediaIds(allIds)}.`)
     }
     if (!title) {
-      throw new Error(`Invalid movie: ${title ?? "<unknown title>"} (${id.toString()})`)
+      throw new Error(`Invalid movie: ${title ?? "<unknown title>"} (${id.toString()}).`)
     }
     return new PlexMovie(id, title)
   }

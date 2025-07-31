@@ -5,7 +5,7 @@ export type MediaId = NonNullable<ReturnType<typeof getMediaId>>
 
 export function getMediaIds(logger: ILogger, guids?: PayloadGuid[]) {
   if (!guids) {
-    throw new Error(`No guids`)
+    throw new Error(`No guids.`)
   }
   return guids.map((guid) => getMediaId(logger, guid?.id)).filter((id): id is MediaId => !!id)
 }

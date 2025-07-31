@@ -41,7 +41,7 @@ describe("MovieScrobbleWebhook", () => {
     // act
     const promise = () => webhook.process(fakePayload, fakeMember, fakeLogger.info)
     // assert
-    await expect(promise).rejects.toEqual(new Error(`No movie found for: ${fakeMediaName}`))
+    await expect(promise).rejects.toEqual(new Error(`No movie found for: ${fakeMediaName}.`))
   })
 
   // eslint-disable-next-line jest/expect-expect
@@ -72,7 +72,7 @@ describe("MovieScrobbleWebhook", () => {
     // act
     const promise = () => webhook.process(fakePayload, fakeMember, fakeLogger.info)
     // assert
-    await expect(promise).rejects.toEqual(new Error(`No movie found for: ${fakeMediaName}`))
+    await expect(promise).rejects.toEqual(new Error(`No movie found for: ${fakeMediaName}.`))
   })
 
   it("fails if movie is not scrobbled", async () => {
@@ -92,7 +92,7 @@ describe("MovieScrobbleWebhook", () => {
     // act
     const promise = () => webhook.process(fakePayload, fakeMember, fakeLogger.info)
     // assert
-    await expect(promise).rejects.toEqual(new Error(`Movie not marked as watched for: ${fakeMediaName}`))
+    await expect(promise).rejects.toEqual(new Error(`Movie not marked as watched for: ${fakeMediaName}.`))
   })
 
   // eslint-disable-next-line jest/expect-expect

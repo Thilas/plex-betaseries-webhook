@@ -22,12 +22,12 @@ export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
     const episode = payload.Metadata?.index
     if (!id) {
       throw new Error(
-        `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(allIds)}`,
+        `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(allIds)}.`,
       )
     }
     if (!title || typeof season === "undefined" || typeof episode === "undefined") {
       throw new Error(
-        `Invalid episode: ${title ?? "<unknown title>"} ${formatEpisode(season, episode)} (${id.toString()})`,
+        `Invalid episode: ${title ?? "<unknown title>"} ${formatEpisode(season, episode)} (${id.toString()}).`,
       )
     }
     return new PlexEpisode(id, title, season, episode)

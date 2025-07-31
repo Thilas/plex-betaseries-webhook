@@ -18,7 +18,7 @@ export class EpisodeScrobbleWebhook implements IWebhook {
     info(media.toString())
     const episode = await member.getEpisode({ id: media.id })
     if (!episode) {
-      throw new Error(`No episode found for: ${media.toString()}`)
+      throw new Error(`No episode found for: ${media.toString()}.`)
     }
     if (episode.user.seen) {
       this.logger.info("Episode already scrobbled")
@@ -26,10 +26,10 @@ export class EpisodeScrobbleWebhook implements IWebhook {
     }
     const result = await member.markEpisodeAsWatched({ id: episode.id, bulk: false })
     if (!result) {
-      throw new Error(`No episode found for: ${media.toString()}`)
+      throw new Error(`No episode found for: ${media.toString()}.`)
     }
     if (!result.user.seen) {
-      throw new Error(`Episode not marked as watched for: ${media.toString()}`)
+      throw new Error(`Episode not marked as watched for: ${media.toString()}.`)
     }
     this.logger.info("Episode scrobbled")
   }

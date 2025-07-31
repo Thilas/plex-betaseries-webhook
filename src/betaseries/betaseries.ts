@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse } from "axios"
 import Url from "domurl"
 import { inject } from "inversify"
 import { interfaces } from "inversify-express-utils"
-import { Configuration } from "../configuration"
+import { ClientConfiguration, Configuration, getClientConfiguration } from "../configuration"
 import { ids, provideSingleton } from "../decorators"
 import { ILogger } from "../logger"
 import { ImdbId, MediaId, TmdbId, TvdbId } from "../plex/media/ids"
@@ -12,44 +12,68 @@ import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./mod
 export class BetaSeries {
   static readonly codeKey = "code"
 
-  constructor(@inject(ids.logger) readonly logger: ILogger, readonly configuration: Configuration) {}
+  constructor(
+    @inject(ids.logger) readonly logger: ILogger,
+    readonly configuration: Configuration,
+  ) {}
 
-  getAuthenticationUrl() {
-    this.logger.info("Requesting BetaSeries authentication...")
-    const url = new Url<AuthenticationUrl>(this.configuration.betaseries.url)
-    url.path = "/authorize"
-    url.query.client_id = this.configuration.betaseries.client.clientId
-    url.query.redirect_uri = this.configuration.server.url
+  getRedirectUrl(clientConfiguration: ClientConfiguration) {
+    const url = new Url<{ plexAccount: string }>(this.configuration.server.url)
+    url.query.plexAccount = clientConfiguration.plexAccount
     return url.toString()
   }
 
-  async getUser(code: string) {
+  getAuthenticationUrl(clientConfiguration: ClientConfiguration) {
+    this.logger.info("Requesting BetaSeries authentication...")
+    const url = new Url<AuthenticationUrl>(this.configuration.betaseries.url)
+    url.path = "/authorize"
+    url.query.client_id = clientConfiguration.clientId
+    url.query.redirect_uri = this.getRedirectUrl(clientConfiguration)
+    return url.toString()
+  }
+
+  async getUser(clientConfiguration: ClientConfiguration, code: string) {
     this.logger.info("Requesting a new access token...")
-    const client = this.getClient()
+    const client = this.getClient(clientConfiguration)
     const res: AxiosResponse<{ readonly access_token: string }> = await client.post("oauth/access_token", {
-      client_id: this.configuration.betaseries.client.clientId,
-      client_secret: this.configuration.betaseries.client.clientSecret,
-      redirect_uri: this.configuration.server.url,
+      client_id: clientConfiguration.clientId,
+      client_secret: clientConfiguration.clientSecret,
+      redirect_uri: this.getRedirectUrl(clientConfiguration),
       code,
     })
     const accessToken = res.data.access_token
-    const { login } = await this.checkAccessToken(accessToken)
+    const { login } = await this.checkAccessToken(clientConfiguration, accessToken)
     this.logger.info(`New access token issued for ${login}`)
     return { accessToken, login } as BetaSeriesUser
   }
 
-  async getPrincipal(accessToken?: string) {
-    if (!accessToken) {
+  async getPrincipal(plexAccount?: string, accessToken?: string) {
+    if (!plexAccount) {
+      this.logger.debug("Empty plex account")
       return new BetaSeriesPrincipal()
     }
-    const { login } = await this.checkAccessToken(accessToken)
-    this.logger.info(`Access token of ${login} checked`)
-    return new BetaSeriesPrincipal({ accessToken, login })
+    const clientConfiguration = getClientConfiguration(this.configuration.betaseries, plexAccount)
+    if (!clientConfiguration) {
+      this.logger.debug("Invalid plex account")
+      return new BetaSeriesPrincipal()
+    }
+    if (!accessToken) {
+      this.logger.debug("Empty access token")
+      return new BetaSeriesPrincipal(clientConfiguration)
+    }
+    try {
+      const { login } = await this.checkAccessToken(clientConfiguration, accessToken)
+      this.logger.info(`Access token of ${login} checked`)
+      return new BetaSeriesPrincipal(clientConfiguration, { accessToken, login })
+    } catch (error) {
+      this.logger.debug("Invalid access token", error)
+      return new BetaSeriesPrincipal(clientConfiguration)
+    }
   }
 
-  async getMember(user: BetaSeriesUser) {
+  async getMember(clientConfiguration: ClientConfiguration, user: BetaSeriesUser) {
     this.guardAccessToken(user.accessToken)
-    const client = this.getClient(user.accessToken)
+    const client = this.getClient(clientConfiguration, user.accessToken)
     return new BetaSeriesMember(client, user.login)
   }
 
@@ -59,18 +83,18 @@ export class BetaSeries {
     }
   }
 
-  private async checkAccessToken(accessToken?: string) {
+  private async checkAccessToken(clientConfiguration: ClientConfiguration, accessToken?: string) {
     this.guardAccessToken(accessToken)
-    const client = this.getClient(accessToken)
+    const client = this.getClient(clientConfiguration, accessToken)
     const res: AxiosResponse<{ readonly member: { readonly login: string } }> = await client.get("members/infos")
     return { login: res.data.member.login }
   }
 
-  private getClient(accessToken?: string) {
+  private getClient(clientConfiguration: ClientConfiguration, accessToken?: string) {
     const client = axios.create({
-      baseURL: this.configuration.betaseries.client.url,
-      timeout: this.configuration.betaseries.client.timeoutInSeconds * 1000,
-      headers: this.getHeaders(accessToken),
+      baseURL: this.configuration.betaseries.apiUrl,
+      timeout: this.configuration.betaseries.timeoutInSeconds * 1000,
+      headers: this.getHeaders(clientConfiguration, accessToken),
     })
     // Intercept errors to display the actual BetaSeries errors (if applicable)
     client.interceptors.response.use(undefined, (error) => {
@@ -89,11 +113,11 @@ export class BetaSeries {
     return client
   }
 
-  private getHeaders(accessToken?: string) {
+  private getHeaders(clientConfiguration: ClientConfiguration, accessToken?: string) {
     const headers = {
       "Accept-Encoding": "gzip, compress, deflate", // Workaround for https://github.com/axios/axios/issues/5311, "br" is not supported for now
-      "X-BetaSeries-Version": this.configuration.betaseries.client.apiVersion,
-      "X-BetaSeries-Key": this.configuration.betaseries.client.clientId,
+      "X-BetaSeries-Version": this.configuration.betaseries.apiVersion,
+      "X-BetaSeries-Key": clientConfiguration.clientId,
     }
     return accessToken
       ? {
@@ -120,14 +144,16 @@ export type BetaSeriesUser = {
 }
 
 export class BetaSeriesPrincipal implements interfaces.Principal {
+  readonly clientConfiguration: ClientConfiguration | undefined
   readonly details: BetaSeriesUser | undefined
 
-  constructor(details?: BetaSeriesUser) {
+  constructor(clientConfiguration?: ClientConfiguration, details?: BetaSeriesUser) {
+    this.clientConfiguration = clientConfiguration
     this.details = details
   }
 
   isAuthenticated() {
-    return Promise.resolve(!!this.details)
+    return Promise.resolve(!!this.clientConfiguration && !!this.details)
   }
 
   isInRole() {
@@ -142,7 +168,10 @@ export class BetaSeriesPrincipal implements interfaces.Principal {
 export class BetaSeriesMember {
   readonly #client: AxiosInstance
 
-  constructor(client: AxiosInstance, readonly login: string) {
+  constructor(
+    client: AxiosInstance,
+    readonly login: string,
+  ) {
     this.#client = client
   }
 

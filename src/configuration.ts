@@ -34,13 +34,31 @@ export type ServerConfiguration = {
 
 export type BetaSeriesConfiguration = {
   readonly url: string
-  readonly client: ClientConfiguration
+  readonly apiUrl: string
+  readonly apiVersion: string
+  readonly timeoutInSeconds: number
+  readonly client?: ClientConfiguration
+  readonly clients?: Record<string, Omit<ClientConfiguration, "plexAccount">>
 }
 
 export type ClientConfiguration = {
-  readonly url: string
-  readonly apiVersion: string
-  readonly timeoutInSeconds: number
+  readonly plexAccount: string
   readonly clientId: string
   readonly clientSecret: string
+}
+
+export function getClientConfiguration(betaseries: BetaSeriesConfiguration, plexAccount: string) {
+  if (betaseries.client && betaseries.client.plexAccount === plexAccount) {
+    return betaseries.client
+  }
+  if (betaseries.clients) {
+    const clientConfiguration = betaseries.clients[plexAccount]
+    if (!clientConfiguration) {
+      return
+    }
+    return {
+      ...clientConfiguration,
+      plexAccount: plexAccount,
+    } as ClientConfiguration
+  }
 }
