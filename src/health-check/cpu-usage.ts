@@ -13,7 +13,7 @@ export class CpuUsageHealthCheck implements IHealthCheck {
   async invoke(): Promise<HealthComponent> {
     const startCpuUsage = process.cpuUsage()
     const start = Date.now()
-    await delay(500)
+    await delay(10)
     const cpuUsage = process.cpuUsage(startCpuUsage)
     const end = Date.now()
 
