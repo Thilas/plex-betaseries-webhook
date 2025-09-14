@@ -49,7 +49,6 @@ export class BetaSeries {
 
   async getPrincipal(plexAccount?: string, accessToken?: string) {
     if (!plexAccount) {
-      this.logger.debug("Empty plex account")
       return new BetaSeriesPrincipal()
     }
     const clientConfiguration = getClientConfiguration(this.configuration.betaseries, plexAccount)
