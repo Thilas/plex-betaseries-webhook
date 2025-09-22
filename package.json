@@ -46,7 +46,7 @@
     "moq.ts": "^10.0.8",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.1",
+    "ts-jest": "^29.4.4",
     "typescript": "^5.9.2"
   },
   "jestSonar": {
