@@ -18,7 +18,7 @@
     "inversify": "^6.2.2",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.5.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "md5": "^2.3.0",
     "multer": "^2.0.2",
     "reflect-metadata": "^0.2.2",
