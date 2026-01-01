@@ -14,7 +14,7 @@
     "axios": "^1.13.2",
     "config": "^4.1.1",
     "domurl": "^2.3.4",
-    "express": "^4.21.2",
+    "express": "^4.22.1",
     "inversify": "^6.2.2",
     "inversify-binding-decorators": "^4.0.0",
     "inversify-express-utils": "^6.5.0",
