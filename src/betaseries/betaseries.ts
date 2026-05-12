@@ -1,11 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios"
 import Url from "domurl"
 import { inject } from "inversify"
-import { interfaces } from "inversify-express-utils"
 import { ClientConfiguration, Configuration, getClientConfiguration } from "../configuration"
 import { ids, provideSingleton } from "../decorators"
 import { ILogger } from "../logger"
 import { ImdbId, MediaId, TmdbId, TvdbId } from "../plex/media/ids"
+import { getLoggerError } from "../utils"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./models"
 
 @provideSingleton(BetaSeries)
@@ -14,8 +14,8 @@ export class BetaSeries {
 
   constructor(
     @inject(ids.logger) readonly logger: ILogger,
-    readonly configuration: Configuration,
-  ) {}
+    @inject(Configuration) readonly configuration: Configuration,
+  ) { }
 
   getRedirectUrl(clientConfiguration: ClientConfiguration) {
     const url = new Url<{ plexAccount: string }>(this.configuration.server.url)
@@ -65,7 +65,7 @@ export class BetaSeries {
       this.logger.info(`Access token of ${login} checked`)
       return new BetaSeriesPrincipal(clientConfiguration, { accessToken, login })
     } catch (error) {
-      this.logger.debug("Invalid access token", error)
+      this.logger.debug("Invalid access token", getLoggerError(error))
       return new BetaSeriesPrincipal(clientConfiguration)
     }
   }
@@ -118,12 +118,7 @@ export class BetaSeries {
       "X-BetaSeries-Version": this.configuration.betaseries.apiVersion,
       "X-BetaSeries-Key": clientConfiguration.clientId,
     }
-    return accessToken
-      ? {
-          ...headers,
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : headers
+    return accessToken ? { ...headers, Authorization: `Bearer ${accessToken}` } : headers
   }
 }
 
@@ -142,25 +137,13 @@ export type BetaSeriesUser = {
   readonly login: string
 }
 
-export class BetaSeriesPrincipal implements interfaces.Principal {
+export class BetaSeriesPrincipal {
   readonly clientConfiguration: ClientConfiguration | undefined
-  readonly details: BetaSeriesUser | undefined
+  readonly user: BetaSeriesUser | undefined
 
-  constructor(clientConfiguration?: ClientConfiguration, details?: BetaSeriesUser) {
+  constructor(clientConfiguration?: ClientConfiguration, user?: BetaSeriesUser) {
     this.clientConfiguration = clientConfiguration
-    this.details = details
-  }
-
-  isAuthenticated() {
-    return Promise.resolve(!!this.clientConfiguration && !!this.details)
-  }
-
-  isInRole() {
-    return Promise.resolve(false)
-  }
-
-  isResourceOwner() {
-    return Promise.resolve(false)
+    this.user = user
   }
 }
 

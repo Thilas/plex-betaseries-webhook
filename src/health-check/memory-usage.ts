@@ -1,4 +1,4 @@
-import { provide } from "inversify-binding-decorators"
+import { provide } from "@inversifyjs/binding-decorators"
 import { ids } from "../decorators"
 import { IHealthCheck } from "../health-check/health-check"
 import { HealthComponent } from "./models"

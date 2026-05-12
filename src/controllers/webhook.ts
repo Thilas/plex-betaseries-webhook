@@ -1,68 +1,60 @@
 import Url from "domurl"
+import { Request as ExpressRequest } from "express"
 import { inject } from "inversify"
 import {
-  BaseHttpController,
-  controller,
-  httpGet,
-  httpPost,
-  HttpResponseMessage,
-  queryParam,
-  StringContent,
-} from "inversify-express-utils"
+  ApplyMiddleware,
+  BadRequestHttpResponse,
+  Controller,
+  CreatedHttpResponse,
+  Get,
+  Post,
+  Query,
+  Request,
+  SuccessHttpResponse,
+  UnauthorizedHttpResponse
+} from "@inversifyjs/http-core"
 import { BetaSeries, BetaSeriesPrincipal, BetaSeriesUser } from "../betaseries/betaseries"
 import { ClientConfiguration, Configuration } from "../configuration"
-import { ids } from "../decorators"
+import { AuthenticationMiddleware } from "../middlewares/authentication"
 import { MulterMiddleware } from "../middlewares/multer"
-import { PayloadMiddleware, PayloadProvider } from "../middlewares/payload"
+import { Payload, PayloadMiddleware } from "../middlewares/payload"
 import { WebhookManager } from "../plex/webhooks/manager"
 import { htmlEncode } from "../utils"
 
-@controller("/")
-export class WebhookController extends BaseHttpController {
+@ApplyMiddleware(AuthenticationMiddleware)
+@Controller()
+export class WebhookController {
   constructor(
-    readonly configuration: Configuration,
-    readonly betaseries: BetaSeries,
-    @inject(ids.payloadProvider) readonly getPayload: PayloadProvider,
-    readonly webhookManager: WebhookManager,
-  ) {
-    super()
-  }
+    @inject(Configuration) readonly configuration: Configuration,
+    @inject(BetaSeries) readonly betaseries: BetaSeries,
+    @inject(WebhookManager) readonly webhookManager: WebhookManager,
+  ) { }
 
-  get clientConfiguration() {
-    const user = this.httpContext.user as BetaSeriesPrincipal
-    return user.clientConfiguration
-  }
-
-  get user() {
-    const user = this.httpContext.user as BetaSeriesPrincipal
-    return user.details
-  }
-
-  @httpGet("/")
-  async get(@queryParam(BetaSeries.codeKey) code?: string) {
-    const clientConfiguration = this.clientConfiguration
+  @Get()
+  async get(@Request() req: WebhookRequest, @Query({ name: BetaSeries.codeKey }) code?: string) {
+    const { clientConfiguration, user } = req.principal
     if (!clientConfiguration) {
-      return this.statusCode(404)
+      return new UnauthorizedHttpResponse()
     }
-    const user = this.user
     if (!user) {
-      const url = await this.getUrl(this.clientConfiguration, code)
-      return this.redirect(url)
+      const url = await this.getUrl(clientConfiguration, code)
+      const response = new SuccessHttpResponse(302, undefined, { "location": url })
+      return response
     }
-    return this.displayUser(this.clientConfiguration, user)
+    return this.displayUser(clientConfiguration, user)
   }
 
-  @httpPost("/", MulterMiddleware, PayloadMiddleware)
-  async post() {
-    const clientConfiguration = this.clientConfiguration
-    if (!clientConfiguration) {
-      return this.statusCode(401)
+  @Post()
+  @ApplyMiddleware(MulterMiddleware, PayloadMiddleware)
+  async post(@Request() req: WebhookRequest) {
+    const { clientConfiguration, user } = req.principal
+    if (!clientConfiguration || !user) {
+      return new UnauthorizedHttpResponse()
     }
-    const user = this.user
-    if (!user) {
-      return this.statusCode(401)
+    const payload = req.payload
+    if (!payload) {
+      return new BadRequestHttpResponse()
     }
-    const payload = await this.getPayload()
     await this.webhookManager.process(clientConfiguration, payload, user)
   }
 
@@ -76,18 +68,16 @@ export class WebhookController extends BaseHttpController {
 
   private displayUser(clientConfiguration: ClientConfiguration, user: BetaSeriesUser) {
     const url = this.getUrlWithAccessToken(clientConfiguration, user)
-    const message = new HttpResponseMessage()
-    message.content = new StringContent(`<html>
-<head>
-<title>Plex Webhook for BetaSeries</title>
-<link rel="icon" type="image/png" href="/favicon.ico">
-</head>
-<body>
-Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlEncode(url)}</a>
-</body>
-</html>`)
-    message.content.headers["content-type"] = "text/html"
-    return this.responseMessage(message)
+    const response = new CreatedHttpResponse(`<html>
+  <head>
+  <title>Plex Webhook for BetaSeries</title>
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  </head>
+  <body>
+  Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlEncode(url)}</a>
+  </body>
+</html>`, { "content-type": "text/html" })
+    return response
   }
 
   private getUrlWithAccessToken(clientConfiguration: ClientConfiguration, user: BetaSeriesUser) {
@@ -96,6 +86,11 @@ Plex webhook for ${htmlEncode(user.login)}: <a href="${htmlEncode(url)}">${htmlE
     url.query.accessToken = user.accessToken
     return url.toString()
   }
+}
+
+export type WebhookRequest = ExpressRequest & {
+  principal: BetaSeriesPrincipal,
+  payload?: Payload,
 }
 
 type AccessTokenUrl = {

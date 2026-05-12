@@ -1,5 +1,4 @@
 import { container } from "../container"
-import { interfaces, JsonContent, results, TYPE } from "inversify-express-utils"
 import { Mock, MockBuilder } from "../../test/moq"
 import { HealthCheckManager } from "../health-check/health-check"
 import { HealthResponse } from "../health-check/models"
@@ -7,10 +6,8 @@ import { HealthCheckController } from "./health-check"
 
 function setup(args: { healthCheckManagerBuilder?: MockBuilder<HealthCheckManager> }) {
   const healthCheckManagerMock = new Mock<HealthCheckManager>({ builder: args.healthCheckManagerBuilder })
-  const httpContextMock = new Mock<interfaces.HttpContext>()
   container.unbind(HealthCheckManager)
   container.bind(HealthCheckManager).toConstantValue(healthCheckManagerMock.object())
-  container.bind<interfaces.HttpContext>(TYPE.HttpContext).toConstantValue(httpContextMock.object())
   container.bind(HealthCheckController).to(HealthCheckController)
   const controller = container.get(HealthCheckController)
   return controller
@@ -38,19 +35,15 @@ describe("HealthCheckController", () => {
       // act
       const result = await controller.get()
       // assert
-      expect(result).toBeInstanceOf(results.ResponseMessageResult)
-      const message = await result.executeAsync()
-      expect(message.statusCode).toBe(200)
-      expect(message.content).toBeInstanceOf(JsonContent)
-      expect(message.content.headers).toMatchObject({
+      expect(result.statusCode).toBe(200)
+      expect(result.headers).toMatchObject({
         "content-type": "application/health+json",
         "cache-control": "max-age=3600",
       })
-      const content = message.content as JsonContent
-      await expect(content.readAsync()).resolves.toBe(response)
+      expect(result.body).toBe(response)
     })
 
-    it("returns a 299 status when healthcheck warns", async () => {
+    it("returns a 202 status when healthcheck warns", async () => {
       // arrange
       const controller = setup({
         healthCheckManagerBuilder: (mock) => {
@@ -60,9 +53,7 @@ describe("HealthCheckController", () => {
       // act
       const result = await controller.get()
       // assert
-      expect(result).toBeInstanceOf(results.ResponseMessageResult)
-      const message = await result.executeAsync()
-      expect(message.statusCode).toBe(299)
+      expect(result.statusCode).toBe(202)
     })
 
     it("returns a 503 status when healthcheck fails", async () => {
@@ -75,9 +66,7 @@ describe("HealthCheckController", () => {
       // act
       const result = await controller.get()
       // assert
-      expect(result).toBeInstanceOf(results.ResponseMessageResult)
-      const message = await result.executeAsync()
-      expect(message.statusCode).toBe(503)
+      expect(result.statusCode).toBe(503)
     })
   })
 })

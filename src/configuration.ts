@@ -1,10 +1,10 @@
-import type { IConfig } from "config"
+import type { Config } from "config"
 import { inject } from "inversify"
 import { ids, provideSingleton } from "./decorators"
 
-export type { IConfig } from "config"
+export type { Config } from "config"
 
-export function getConfig(): IConfig {
+export function getConfig(): Config {
   return require("config")
 }
 
@@ -13,7 +13,7 @@ export class Configuration {
   readonly server: ServerConfiguration
   readonly betaseries: BetaSeriesConfiguration
 
-  constructor(@inject(ids.config) config: IConfig) {
+  constructor(@inject(ids.config) config: Config) {
     const server = config.get("server") as Partial<ServerConfiguration>
     const port = server?.port ?? 12000
     const urlPort = port === 80 ? "" : `:${port}`

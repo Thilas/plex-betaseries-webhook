@@ -1,8 +1,9 @@
 import "reflect-metadata"
 import { Container, ContainerModule } from "inversify"
-import { buildProviderModule } from "inversify-binding-decorators"
+import { buildProviderModule } from "@inversifyjs/binding-decorators"
 import "./betaseries/betaseries"
-import { getConfig, IConfig } from "./configuration"
+import { getConfig, Config } from "./configuration"
+import { FaviconHandler, getFaviconHandler } from "./controllers/favicon"
 import "./controllers/health-check"
 import "./controllers/webhook"
 import { getWebhookDefinition, ids } from "./decorators"
@@ -12,42 +13,34 @@ import "./health-check/memory-usage"
 import "./health-check/uptime"
 import { getLogger, ILogger } from "./logger"
 import { getMulterFactory, IMulterFactory } from "./middlewares/multer"
-import { PayloadProvider } from "./middlewares/payload"
 import { MediaId } from "./plex/media/ids"
 import "./plex/webhooks/episode"
 import { IMediaFactory, IWebhook, MediaFactoryProvider, WebhookProvider } from "./plex/webhooks/manager"
 import "./plex/webhooks/movie"
 import "./server"
 
-const containerModule = new ContainerModule((bind) => {
-  bind<IConfig>(ids.config).toDynamicValue(getConfig).inSingletonScope()
-  bind<ILogger>(ids.logger).toDynamicValue(getLogger).inSingletonScope()
-  bind<IMulterFactory>(ids.multerFactory).toDynamicValue(getMulterFactory).inSingletonScope()
+const containerModule = new ContainerModule((options) => {
+  options.bind<Config>(ids.config).toDynamicValue(getConfig).inSingletonScope()
+  options.bind<ILogger>(ids.logger).toDynamicValue(getLogger).inSingletonScope()
+  options.bind<FaviconHandler>(ids.faviconHandler).toDynamicValue(getFaviconHandler).inSingletonScope()
+  options.bind<IMulterFactory>(ids.multerFactory).toDynamicValue(getMulterFactory).inSingletonScope()
 
-  bind<PayloadProvider>(ids.payloadProvider).toProvider(() => {
-    return () => Promise.reject(new Error("No payload in this context."))
-  })
-
-  bind<WebhookProvider>(ids.webhookProvider).toProvider((context) => {
+  options.bind<WebhookProvider>(ids.webhookProvider).toFactory((context) => {
     return (type: string, event: string) => {
       const definition = getWebhookDefinition(type, event)
-      const value = context.container.isBoundNamed(ids.webhook, definition)
-        ? context.container.getNamed<IWebhook>(ids.webhook, definition)
-        : undefined
+      const value = context.get<IWebhook>(ids.webhook, { name: definition, optional: true })
       return Promise.resolve(value)
     }
   })
 
-  bind<MediaFactoryProvider>(ids.mediaFactoryProvider).toProvider((context) => {
+  options.bind<MediaFactoryProvider>(ids.mediaFactoryProvider).toFactory((context) => {
     return (type: string) => {
-      const value = context.container.isBoundNamed(ids.mediaFactory, type)
-        ? context.container.getNamed<IMediaFactory<MediaId>>(ids.mediaFactory, type)
-        : undefined
+      const value = context.get<IMediaFactory<MediaId>>(ids.mediaFactory, { name: type, optional: true })
       return Promise.resolve(value)
     }
   })
 })
 
-export const container = new Container()
+export const container = new Container({ autobind: true })
 container.load(buildProviderModule(), containerModule)
 container.bind(Container).toConstantValue(container)

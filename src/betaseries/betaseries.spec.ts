@@ -2,7 +2,7 @@ import "../container"
 import MockAdapter from "axios-mock-adapter/types"
 import { AxiosInstanceMock } from "../../test/axios"
 import { getLoggerMock } from "../../test/logger"
-import { BetaSeries, BetaSeriesPrincipal } from "./betaseries"
+import { BetaSeries } from "./betaseries"
 import { BetaSeriesMovieStatus } from "./models"
 
 const fakeLogger = getLoggerMock().object()
@@ -113,21 +113,21 @@ describe("BetaSeries", () => {
       // act
       const principal = await betaseries.getPrincipal("")
       // assert
-      expect(principal.details).toBeUndefined()
+      expect(principal.user).toBeUndefined()
     })
 
     it("succeeds if invalid plex account", async () => {
       // act
       const principal = await betaseries.getPrincipal("invalid")
       // assert
-      expect(principal.details).toBeUndefined()
+      expect(principal.user).toBeUndefined()
     })
 
     it("succeeds if empty access token", async () => {
       // act
       const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, "")
       // assert
-      expect(principal.details).toBeUndefined()
+      expect(principal.user).toBeUndefined()
     })
 
     it("succeeds if invalid access token", async () => {
@@ -136,7 +136,7 @@ describe("BetaSeries", () => {
       // act
       const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, fakeAccessToken)
       // assert
-      expect(principal.details).toBeUndefined()
+      expect(principal.user).toBeUndefined()
     })
 
     it("succeeds if valid access token", async () => {
@@ -145,7 +145,7 @@ describe("BetaSeries", () => {
       // act
       const principal = await betaseries.getPrincipal(fakeClientConfiguration.plexAccount, fakeAccessToken)
       // assert
-      expect(principal.details).toEqual(fakePrincipal)
+      expect(principal.user).toEqual(fakePrincipal)
     })
   })
 
@@ -155,50 +155,6 @@ describe("BetaSeries", () => {
       const principalPromise = betaseries.getMember(fakeClientConfiguration, { accessToken: "", login: "" })
       // assert
       await expect(principalPromise).rejects.toEqual(new Error("Empty access token"))
-    })
-  })
-})
-
-describe("BetaSeriesPrincipal", () => {
-  describe("isAuthenticated", () => {
-    it("returns false when not authenticated", async () => {
-      // arrange
-      const principal = new BetaSeriesPrincipal()
-      // act
-      const result = await principal.isAuthenticated()
-      // assert
-      expect(result).toBeFalsy()
-    })
-
-    it("returns true when authenticated", async () => {
-      // arrange
-      const principal = new BetaSeriesPrincipal(fakeClientConfiguration, fakeUser)
-      // act
-      const result = await principal.isAuthenticated()
-      // assert
-      expect(result).toBeTruthy()
-    })
-  })
-
-  describe("isResourceOwner", () => {
-    it("returns always false", async () => {
-      // arrange
-      const principal = new BetaSeriesPrincipal()
-      // act
-      const result = await principal.isResourceOwner()
-      // assert
-      expect(result).toBeFalsy()
-    })
-  })
-
-  describe("isInRole", () => {
-    it("returns always false", async () => {
-      // arrange
-      const principal = new BetaSeriesPrincipal()
-      // act
-      const result = await principal.isInRole()
-      // assert
-      expect(result).toBeFalsy()
     })
   })
 })

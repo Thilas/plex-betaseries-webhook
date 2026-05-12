@@ -1,35 +1,33 @@
 import { inject } from "inversify"
-import { BaseHttpController, controller, httpGet, HttpResponseMessage, JsonContent } from "inversify-express-utils"
+import { Controller, Get, HttpStatusCode, SuccessHttpResponse } from "@inversifyjs/http-core"
 import { HealthCheckManager } from "../health-check/health-check"
 import { HealthResponse } from "../health-check/models"
 
 export const HealthCheckPath = "/health"
 
-@controller(HealthCheckPath)
-export class HealthCheckController extends BaseHttpController {
-  constructor(@inject(HealthCheckManager) readonly healthCheckManager: HealthCheckManager) {
-    super()
-  }
+@Controller(HealthCheckPath)
+export class HealthCheckController {
+  constructor(@inject(HealthCheckManager) readonly healthCheckManager: HealthCheckManager) { }
 
-  @httpGet("/")
+  @Get()
   async get() {
     const response = await this.healthCheckManager.getHealthCheck()
     const statusCode = this.getStatusCode(response)
-    const message = new HttpResponseMessage(statusCode)
-    message.content = new JsonContent(response)
-    message.content.headers["content-type"] = "application/health+json"
-    message.content.headers["cache-control"] = "max-age=3600"
-    return this.responseMessage(message)
+    const httpResponse = new SuccessHttpResponse(statusCode, response, {
+      "content-type": "application/health+json",
+      "cache-control": "max-age=3600",
+    })
+    return httpResponse
   }
 
-  private getStatusCode(response: HealthResponse): number {
+  private getStatusCode(response: HealthResponse): HttpStatusCode {
     switch (response.status) {
       case "fail":
-        return 503
+        return HttpStatusCode.SERVICE_UNAVAILABLE
       case "warn":
-        return 299
+        return HttpStatusCode.ACCEPTED
       case "pass":
-        return 200
+        return HttpStatusCode.OK
     }
   }
 }

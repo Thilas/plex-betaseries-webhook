@@ -1,8 +1,10 @@
-import { interfaces } from "inversify"
-import { fluentProvide } from "inversify-binding-decorators"
+import { BindingConstraints, ServiceIdentifier } from "inversify"
+import { provide } from "@inversifyjs/binding-decorators"
 
-export function provideSingleton<T>(serviceIdentifier: interfaces.ServiceIdentifier<T>) {
-  return fluentProvide(serviceIdentifier).inSingletonScope().done(true)
+export function provideSingleton<T>(serviceIdentifier: ServiceIdentifier<T>) {
+  return provide(serviceIdentifier, (bind) => bind
+    .inSingletonScope()
+  )
 }
 
 export function getWebhookDefinition(type: string, event: string) {
@@ -10,19 +12,28 @@ export function getWebhookDefinition(type: string, event: string) {
 }
 
 export function provideWebhook(type: string, event: string) {
-  return fluentProvide(ids.webhook).inSingletonScope().whenTargetNamed(getWebhookDefinition(type, event)).done(true)
+  return provide(ids.webhook, (bind) => bind
+    .inSingletonScope()
+    .when(whenTargetNamedConstraint(getWebhookDefinition(type, event)))
+  )
 }
 
 export function provideMediaFactory(type: string) {
-  return fluentProvide(ids.mediaFactory).inSingletonScope().whenTargetNamed(type).done(true)
+  return provide(ids.mediaFactory, (bind) => bind
+    .inSingletonScope()
+    .when(whenTargetNamedConstraint(type))
+  )
+}
+
+export function whenTargetNamedConstraint(name: string) {
+  return (metadata: BindingConstraints) => metadata.name === name
 }
 
 export const ids = {
   config: Symbol.for("Config"),
   logger: Symbol.for("Logger"),
+  faviconHandler: Symbol.for("FaviconHandler"),
   multerFactory: Symbol.for("MulterFactory"),
-
-  payloadProvider: Symbol.for("PayloadProvider"),
 
   webhook: Symbol.for("Webhook"),
   webhookProvider: Symbol.for("WebhookProvider"),

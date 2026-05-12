@@ -1,6 +1,6 @@
 import { container } from "./container"
 import { injectable } from "inversify"
-import { getWebhookDefinition, ids } from "./decorators"
+import { getWebhookDefinition, ids, whenTargetNamedConstraint } from "./decorators"
 import { MediaId } from "./plex/media/ids"
 import { IMedia, IMediaFactory, IWebhook, MediaFactoryProvider, WebhookProvider } from "./plex/webhooks/manager"
 
@@ -30,7 +30,7 @@ describe("container", () => {
         .bind(ids.webhook)
         .to(TestWebhook)
         .inSingletonScope()
-        .whenTargetNamed(getWebhookDefinition(fakeType, fakeEvent))
+        .when(whenTargetNamedConstraint(getWebhookDefinition(fakeType, fakeEvent)))
       const getWebhook = container.get<WebhookProvider>(ids.webhookProvider)
       // act
       const webhook = await getWebhook(fakeType, fakeEvent)
@@ -61,7 +61,10 @@ describe("container", () => {
     it("returns the expected webhook", async () => {
       // arrange
       const fakeType = "fakeType"
-      container.bind(ids.mediaFactory).to(TestMediaFactory).inSingletonScope().whenTargetNamed(fakeType)
+      container.bind(ids.mediaFactory)
+        .to(TestMediaFactory)
+        .inSingletonScope()
+        .when(whenTargetNamedConstraint(fakeType))
       const getMediaFactory = container.get<MediaFactoryProvider>(ids.mediaFactoryProvider)
       // act
       const mediaFactory = await getMediaFactory(fakeType)

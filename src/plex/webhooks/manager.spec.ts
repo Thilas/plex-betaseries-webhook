@@ -62,9 +62,9 @@ function setup(args: {
       }
       const media = args.media
         ? new Mock<IMedia<MediaId>>()
-            .setup((e) => e.toString())
-            .returns(args.media)
-            .object()
+          .setup((e) => e.toString())
+          .returns(args.media)
+          .object()
         : undefined
       return new Mock<IMediaFactory<MediaId>>()
         .setup((e) => e.create(payload))
@@ -144,7 +144,7 @@ describe("Webhook", () => {
     loggerMock.verify((e) => e.info(expectedLog), Times.Once())
   })
 
-  it("process expected webhook", async () => {
+  it("processes expected webhook", async () => {
     // arrange
     const { webhookManager, loggerMock, expectedLog } = setup({ anyLogs: true, anyWebhook: true })
     // act
