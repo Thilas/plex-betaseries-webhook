@@ -1,11 +1,9 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "CommonJS",
-    "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
@@ -14,6 +12,7 @@
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "types": ["node", "jest", "reflect-metadata"],
+    "rootDir": "src",
     "outDir": "dist"
   },
   "include": ["src"],

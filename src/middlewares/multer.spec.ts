@@ -30,7 +30,7 @@ describe("MulterMiddleware", () => {
       .object()
     const middleware = new MulterMiddleware(fakeConfiguration, fakeMulterFactory)
     // act
-    middleware.handler(fakeReq, fakeRes, fakeNext)
+    middleware.execute(fakeReq, fakeRes, fakeNext)
     // assert
     multerHandlerMock.verify((e) => e(fakeReq, fakeRes, fakeNext), Times.Once())
   })

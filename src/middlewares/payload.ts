@@ -1,32 +1,29 @@
-import { NextFunction, Request, Response } from "express"
-import { injectable } from "inversify"
-import { BaseMiddleware } from "inversify-express-utils"
+import { NextFunction, Response } from "express"
+import { inject } from "inversify"
+import { ExpressMiddleware } from "@inversifyjs/http-express"
+import { WebhookRequest } from "../controllers/webhook"
 import { ids, provideSingleton } from "../decorators"
+import { ILogger } from "../logger"
+import { getLoggerError } from "../utils"
 
 @provideSingleton(PayloadMiddleware)
-export class PayloadMiddleware extends BaseMiddleware {
-  handler(req: Request, _res: Response, next: NextFunction) {
-    const payload = this.getPayload(req.body?.payload)
-    if (payload) {
-      this.bind<PayloadProvider>(ids.payloadProvider).toProvider(() => {
-        return () => Promise.resolve(payload)
-      })
+export class PayloadMiddleware implements ExpressMiddleware {
+  constructor(@inject(ids.logger) readonly logger: ILogger) { }
+
+  public execute(req: WebhookRequest, _res: Response, next: NextFunction) {
+    const data = req.body?.payload as string | undefined
+    if (data) {
+      try {
+        req.payload = JSON.parse(data) as Payload
+      } catch (error) {
+        this.logger.error("Unable to parse payload", getLoggerError(error))
+      }
     }
     next()
   }
-
-  private getPayload(data?: string) {
-    if (!data) {
-      return
-    }
-    return JSON.parse(data) as Payload
-  }
 }
 
-export type PayloadProvider = () => Promise<Payload>
-
-@injectable()
-export class Payload {
+export type Payload = {
   readonly event: string
   readonly user: boolean
   readonly owner: boolean

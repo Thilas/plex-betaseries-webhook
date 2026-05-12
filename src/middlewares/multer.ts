@@ -1,6 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express"
 import { inject } from "inversify"
-import { BaseMiddleware } from "inversify-express-utils"
+import { ExpressMiddleware } from "@inversifyjs/http-express"
 import type multer from "multer"
 import { Configuration } from "../configuration"
 import { ids, provideSingleton } from "../decorators"
@@ -12,15 +12,17 @@ export function getMulterFactory(): IMulterFactory {
 }
 
 @provideSingleton(MulterMiddleware)
-export class MulterMiddleware extends BaseMiddleware {
+export class MulterMiddleware implements ExpressMiddleware {
   readonly multerHandler: RequestHandler
 
-  constructor(configuration: Configuration, @inject(ids.multerFactory) multerFactory: IMulterFactory) {
-    super()
+  constructor(
+    @inject(Configuration) configuration: Configuration,
+    @inject(ids.multerFactory) multerFactory: IMulterFactory,
+  ) {
     this.multerHandler = multerFactory({ dest: configuration.server.temp, limits: { fileSize: 2000000 } }).any()
   }
 
-  handler(req: Request, res: Response, next: NextFunction) {
+  public execute(req: Request, res: Response, next: NextFunction) {
     this.multerHandler(req, res, next)
   }
 }

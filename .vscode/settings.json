@@ -15,5 +15,8 @@
     "**/node_modules": true,
     "**/tmp": true
   },
-  "typescript.referencesCodeLens.enabled": true
+  "js/ts.referencesCodeLens.enabled": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }

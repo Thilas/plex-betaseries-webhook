@@ -1,9 +1,9 @@
 /* eslint-disable jest/expect-expect */
 import "../container"
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express"
 import { getLoggerMock } from "../../test/logger"
 import { It, Mock, Times } from "../../test/moq"
-import { getErrorHandler } from "./error"
+import { GlobalErrorFilter } from "./error"
 
 describe("ErrorMiddleware", () => {
   it("returns an invalid payload", async () => {
@@ -30,7 +30,6 @@ describe("ErrorMiddleware", () => {
       .returns(fakeRes)
       .setup((e) => e.send(It.IsAny()))
       .returns(fakeRes)
-    const fakeNext = new Mock<NextFunction>().object()
     const loggerMock = getLoggerMock({
       builder: (mock, logger) =>
         mock
@@ -39,17 +38,17 @@ describe("ErrorMiddleware", () => {
           .setup((e) => e.debug(It.IsAny(), It.IsAny()))
           .returns(logger),
     })
-    const handler = getErrorHandler(loggerMock.object())
+    const filter = new GlobalErrorFilter(loggerMock.object())
     // act
-    handler(fakeError, fakeReq, fakeRes, fakeNext)
+    filter.catch(fakeError, fakeReq, fakeRes)
     // assert
     const expectedMessage = `${fakeMethod} ${fakeUrl}`
     resMock
       .verify((e) => e.status(500), Times.Once())
       .verify((e) => e.send(`${expectedMessage}: ${fakeError.message}`), Times.Once())
     loggerMock
-      .verify((e) => e.error(`${expectedMessage}:`, fakeError), Times.Once())
-      .verify((e) => e.debug("Headers", fakeHeaders), Times.Once())
-      .verify((e) => e.debug("Body", fakeParams), Times.Once())
+      .verify((e) => e.error(expectedMessage, fakeError), Times.Once())
+      .verify((e) => e.debug("Headers", { headers: fakeHeaders }), Times.Once())
+      .verify((e) => e.debug("Body", { params: fakeParams }), Times.Once())
   })
 })

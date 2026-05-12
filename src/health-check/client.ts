@@ -5,6 +5,7 @@ import { HealthCheckPath } from "../controllers/health-check"
 import { ids, provideSingleton } from "../decorators"
 import { ILogger } from "../logger"
 import { IProcess } from "../process"
+import { getLoggerError } from "../utils"
 import { HealthResponse } from "./models"
 
 enum HealthStatus {
@@ -14,24 +15,27 @@ enum HealthStatus {
 
 @provideSingleton(HealthCheckClient)
 export class HealthCheckClient implements IProcess {
-  constructor(@inject(ids.logger) readonly logger: ILogger, readonly configuration: Configuration) {}
+  constructor(
+    @inject(ids.logger) readonly logger: ILogger,
+    @inject(Configuration) readonly configuration: Configuration,
+  ) { }
 
   async start() {
     try {
       const response = await this.getHealthCheck()
       if (response.data.status === "fail") {
-        this.logger.error("Service is unhealthy", response.data)
+        this.logger.error("Service is unhealthy", { data: response.data })
         process.exitCode = HealthStatus.unhealthy
       } else {
         if (response.data.status === "warn") {
-          this.logger.warn("Service is healthy", response.data)
+          this.logger.warn("Service is healthy", { data: response.data })
         } else {
-          this.logger.info("Service is healthy", response.data)
+          this.logger.info("Service is healthy", { data: response.data })
         }
         process.exitCode = HealthStatus.success
       }
     } catch (error) {
-      this.logger.error("Unexpected error", error)
+      this.logger.error("Unexpected error", getLoggerError(error))
       process.exitCode = HealthStatus.unhealthy
     }
   }

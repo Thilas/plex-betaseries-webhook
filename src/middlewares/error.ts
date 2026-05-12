@@ -1,16 +1,24 @@
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express"
+import { inject } from "inversify"
+import { CatchError } from "@inversifyjs/http-core"
+import { ExpressErrorFilter } from "@inversifyjs/http-express"
+import { ids } from "../decorators"
 import { ILogger } from "../logger"
-import { hasMember, htmlEncode } from "../utils"
+import { getLoggerError, hasMember, htmlEncode } from "../utils"
 
-export function getErrorHandler(logger: ILogger) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return (err: unknown, req: Request, res: Response, _next: NextFunction) => {
-    const message = `${req.method} ${req.originalUrl}`
-    logger.error(`${message}:`, err)
-    logger.debug("Headers", req.headers)
-    if (Object.keys(req.params).length) {
-      logger.debug("Body", req.params)
+@CatchError()
+export class GlobalErrorFilter implements ExpressErrorFilter {
+  constructor(
+    @inject(ids.logger) readonly logger: ILogger,
+  ) { }
+
+  public catch(err: unknown, request: Request, response: Response) {
+    const message = `${request.method} ${request.originalUrl}`
+    this.logger.error(message, getLoggerError(err))
+    this.logger.debug("Headers", { headers: request.headers })
+    if (Object.keys(request.params).length) {
+      this.logger.debug("Body", { params: request.params })
     }
-    res.status(500).send(htmlEncode(`${message}: ${hasMember(err, "message") ? err.message : err}`))
+    response.status(500).send(htmlEncode(`${message}: ${hasMember(err, "message") ? err.message : err}`))
   }
 }

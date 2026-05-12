@@ -2,11 +2,12 @@ import { createLogger, format, transports } from "winston"
 
 export function getLogger(): ILogger {
   return createLogger({
+    level: "debug",
+    handleExceptions: true,
     transports: [
       new transports.Console({
-        level: "debug",
+        forceConsole: process.env.NODE_ENV !== "production",
         format: format.combine(format.timestamp(), format.colorize({ all: true }), format.simple()),
-        handleExceptions: true,
       }),
     ],
   })

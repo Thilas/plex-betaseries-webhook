@@ -15,6 +15,10 @@ export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: 
   }
 }
 
+export function getLoggerError(error: unknown) {
+  return typeof error === "object" ? error : { error: error }
+}
+
 export function hasMember<T extends string>(value: unknown, member: T): value is { [member in T]: unknown } {
   return typeof value === "object" && value !== null && member in value
 }

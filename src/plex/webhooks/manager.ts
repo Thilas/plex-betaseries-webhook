@@ -1,5 +1,5 @@
 import { inject } from "inversify"
-import { provide } from "inversify-binding-decorators"
+import { provide } from "@inversifyjs/binding-decorators"
 import { BetaSeries, BetaSeriesMember, BetaSeriesUser } from "../../betaseries/betaseries"
 import { getWebhookDefinition, ids } from "../../decorators"
 import { ILogger } from "../../logger"
@@ -14,8 +14,8 @@ export class WebhookManager {
     @inject(ids.logger) readonly logger: ILogger,
     @inject(ids.webhookProvider) readonly getWebhook: WebhookProvider,
     @inject(ids.mediaFactoryProvider) readonly getMediaFactory: MediaFactoryProvider,
-    readonly betaseries: BetaSeries,
-  ) {}
+    @inject(BetaSeries) readonly betaseries: BetaSeries,
+  ) { }
 
   async process(clientConfiguration: ClientConfiguration, payload: Payload, user: BetaSeriesUser) {
     const account = payload.Account?.title

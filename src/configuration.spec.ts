@@ -5,13 +5,13 @@ import {
   ClientConfiguration,
   Configuration,
   getClientConfiguration,
-  IConfig,
+  Config,
 } from "./configuration"
 
 describe("Configuration", () => {
   it("uses default url", () => {
     // arrange
-    const fakeConfig = new Mock<IConfig>()
+    const fakeConfig = new Mock<Config>()
       .setup((e) => e.get("server"))
       .returns({})
       .setup((e) => e.get("betaseries"))
@@ -28,7 +28,7 @@ describe("Configuration", () => {
 
   it("uses default url with specified port", () => {
     // arrange
-    const fakeConfig = new Mock<IConfig>()
+    const fakeConfig = new Mock<Config>()
       .setup((e) => e.get("server"))
       .returns({ port: 1234 })
       .setup((e) => e.get("betaseries"))
@@ -49,7 +49,7 @@ describe("Configuration", () => {
       url: "http://fake.url",
       port: 80,
     }
-    const fakeConfig = new Mock<IConfig>()
+    const fakeConfig = new Mock<Config>()
       .setup((e) => e.get("server"))
       .returns(fakeServerConfig)
       .setup((e) => e.get("betaseries"))
@@ -63,7 +63,7 @@ describe("Configuration", () => {
 
   it("uses port 80", () => {
     // arrange
-    const fakeConfig = new Mock<IConfig>()
+    const fakeConfig = new Mock<Config>()
       .setup((e) => e.get("server"))
       .returns({ port: 80 })
       .setup((e) => e.get("betaseries"))

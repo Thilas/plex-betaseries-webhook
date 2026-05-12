@@ -1,4 +1,4 @@
-import { delay, getFirstSupportedOrDefault, hasMember, htmlEncode } from "./utils"
+import { delay, getFirstSupportedOrDefault, getLoggerError, hasMember, htmlEncode } from "./utils"
 
 describe("delay", () => {
   //#region Timers
@@ -64,6 +64,26 @@ describe("getFirstSupportedOrDefault", () => {
     const result = getFirstSupportedOrDefault([new A(), new C(), new B()] as Base[], [B, C])
     // assert
     expect(result).toEqual(new B())
+  })
+})
+
+describe("getLoggerError", () => {
+  it("returns an object if the input is a string", () => {
+    // arrange
+    const input = "error"
+    // act
+    const result = getLoggerError(input)
+    // assert
+    expect(result).toEqual({ error: input })
+  })
+
+  it("returns an object if the input is an object", () => {
+    // arrange
+    const input = { message: "error" }
+    // act
+    const result = getLoggerError(input)
+    // assert
+    expect(result).toEqual(input)
   })
 })
 
