@@ -38,8 +38,7 @@ export class WebhookController {
     }
     if (!user) {
       const url = await this.getUrl(clientConfiguration, code)
-      const response = new SuccessHttpResponse(302, undefined, { "location": url })
-      return response
+      return new SuccessHttpResponse(302, undefined, { "location": url })
     }
     return this.displayUser(clientConfiguration, user)
   }

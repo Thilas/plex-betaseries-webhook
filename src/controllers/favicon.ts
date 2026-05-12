@@ -1,7 +1,7 @@
+import path from "node:path"
 import { NextFunction, Request as ExpressRequest, Response as ExpressResponse } from "express"
 import { inject } from "inversify"
 import { Controller, Get, Next, Request, Response } from "@inversifyjs/http-core"
-import path from "path"
 import favicon from "serve-favicon"
 import { ids } from "../decorators"
 

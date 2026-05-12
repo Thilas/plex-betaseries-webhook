@@ -5,8 +5,6 @@ import { AuthenticationMiddleware } from "./authentication"
 import { BetaSeries, BetaSeriesPrincipal } from "../betaseries/betaseries"
 import { WebhookRequest } from "../controllers/webhook"
 
-const fakePrincipal = {} as BetaSeriesPrincipal
-
 describe("AuthenticationMiddleware", () => {
   //#region Container
   beforeEach(() => {
@@ -18,6 +16,7 @@ describe("AuthenticationMiddleware", () => {
   })
   //#endregion
 
+  const fakePrincipal = {} as BetaSeriesPrincipal
   const fakeRes = new Mock<Response>().object()
 
   it("returns an unauthenticated principal if no plex account", async () => {
@@ -27,17 +26,17 @@ describe("AuthenticationMiddleware", () => {
       .returnsAsync(fakePrincipal)
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
-    const fakeReq = new Mock<WebhookRequest>()
+    const reqMock = new Mock<WebhookRequest>()
       .setup((e) => e.query["plexAccount"])
       .returns(undefined)
       .setup((e) => { e.principal = fakePrincipal })
       .returns()
-      .object()
     const nextMock = new Mock<NextFunction>().setup((e) => e()).returns()
     const middleware = container.get(AuthenticationMiddleware)
     // act
-    await middleware.execute(fakeReq, fakeRes, nextMock.object())
+    await middleware.execute(reqMock.object(), fakeRes, nextMock.object())
     // assert
+    reqMock.verify((e) => { e.principal = fakePrincipal }, Times.Once())
     nextMock.verify((e) => e(), Times.Once())
   })
 
@@ -49,19 +48,19 @@ describe("AuthenticationMiddleware", () => {
       .returnsAsync(fakePrincipal)
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
-    const fakeReq = new Mock<WebhookRequest>()
+    const reqMock = new Mock<WebhookRequest>()
       .setup((e) => e.query["plexAccount"])
       .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(undefined)
       .setup((e) => { e.principal = fakePrincipal })
       .returns()
-      .object()
     const nextMock = new Mock<NextFunction>().setup((e) => e()).returns()
     const middleware = container.get(AuthenticationMiddleware)
     // act
-    await middleware.execute(fakeReq, fakeRes, nextMock.object())
+    await middleware.execute(reqMock.object(), fakeRes, nextMock.object())
     // assert
+    reqMock.verify((e) => { e.principal = fakePrincipal }, Times.Once())
     nextMock.verify((e) => e(), Times.Once())
   })
 
@@ -73,19 +72,19 @@ describe("AuthenticationMiddleware", () => {
       .returnsAsync(fakePrincipal)
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
-    const fakeReq = new Mock<WebhookRequest>()
+    const reqMock = new Mock<WebhookRequest>()
       .setup((e) => e.query["plexAccount"])
       .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(["invalid"])
       .setup((e) => { e.principal = fakePrincipal })
       .returns()
-      .object()
     const nextMock = new Mock<NextFunction>().setup((e) => e()).returns()
     const middleware = container.get(AuthenticationMiddleware)
     // act
-    await middleware.execute(fakeReq, fakeRes, nextMock.object())
+    await middleware.execute(reqMock.object(), fakeRes, nextMock.object())
     // assert
+    reqMock.verify((e) => { e.principal = fakePrincipal }, Times.Once())
     nextMock.verify((e) => e(), Times.Once())
   })
 
@@ -109,19 +108,19 @@ describe("AuthenticationMiddleware", () => {
       .returnsAsync(fakePrincipal)
       .object()
     container.bind(BetaSeries).toConstantValue(fakeBetaseries)
-    const fakeReq = new Mock<WebhookRequest>()
+    const reqMock = new Mock<WebhookRequest>()
       .setup((e) => e.query["plexAccount"])
       .returns(fakePlexAccount)
       .setup((e) => e.query["accessToken"])
       .returns(fakeAccessToken)
       .setup((e) => { e.principal = fakePrincipal })
       .returns()
-      .object()
     const nextMock = new Mock<NextFunction>().setup((e) => e()).returns()
     const middleware = container.get(AuthenticationMiddleware)
     // act
-    await middleware.execute(fakeReq, fakeRes, nextMock.object())
+    await middleware.execute(reqMock.object(), fakeRes, nextMock.object())
     // assert
+    reqMock.verify((e) => { e.principal = fakePrincipal }, Times.Once())
     nextMock.verify((e) => e(), Times.Once())
   })
 })

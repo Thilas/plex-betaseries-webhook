@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express"
-import { inject, injectable } from "inversify"
+import { inject } from "inversify"
 import { ExpressMiddleware } from "@inversifyjs/http-express"
 import { WebhookRequest } from "../controllers/webhook"
 import { ids, provideSingleton } from "../decorators"
@@ -23,8 +23,7 @@ export class PayloadMiddleware implements ExpressMiddleware {
   }
 }
 
-@injectable()
-export class Payload {
+export type Payload = {
   readonly event: string
   readonly user: boolean
   readonly owner: boolean

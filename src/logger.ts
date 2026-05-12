@@ -6,7 +6,7 @@ export function getLogger(): ILogger {
     handleExceptions: true,
     transports: [
       new transports.Console({
-        forceConsole: true,
+        forceConsole: process.env.NODE_ENV !== "production",
         format: format.combine(format.timestamp(), format.colorize({ all: true }), format.simple()),
       }),
     ],
