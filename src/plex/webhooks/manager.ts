@@ -1,12 +1,12 @@
 import { inject } from "inversify"
 import { provide } from "@inversifyjs/binding-decorators"
 import { BetaSeries, BetaSeriesMember, BetaSeriesUser } from "../../betaseries/betaseries"
+import { ClientConfiguration } from "../../configuration"
 import { getWebhookDefinition, ids } from "../../decorators"
 import { ILogger } from "../../logger"
 import { Payload } from "../../middlewares/payload"
-import { NewReturnType } from "../../utils"
+import { equalsCaseInsensitive, NewReturnType } from "../../utils"
 import { MediaId } from "../media/ids"
-import { ClientConfiguration } from "../../configuration"
 
 @provide(WebhookManager)
 export class WebhookManager {
@@ -19,7 +19,7 @@ export class WebhookManager {
 
   async process(clientConfiguration: ClientConfiguration, payload: Payload, user: BetaSeriesUser) {
     const account = payload.Account?.title
-    if (!account || account.localeCompare(clientConfiguration.plexAccount, undefined, { sensitivity: "accent" }) != 0) {
+    if (!equalsCaseInsensitive(account, clientConfiguration.plexAccount)) {
       return
     }
 

@@ -48,7 +48,7 @@ export type ClientConfiguration = {
 }
 
 export function getClientConfiguration(betaseries: BetaSeriesConfiguration, plexAccount: string) {
-  if (betaseries.client && betaseries.client.plexAccount === plexAccount) {
+  if (betaseries.client?.plexAccount === plexAccount) {
     return betaseries.client
   }
   if (betaseries.clients) {

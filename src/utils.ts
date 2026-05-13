@@ -7,6 +7,10 @@ export function delay(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
 
+export function equalsCaseInsensitive(a: string | undefined, b: string) {
+  return a?.localeCompare(b, undefined, { sensitivity: "accent" }) === 0
+}
+
 export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: T[], types: C[]) {
   for (const type of types) {
     for (const value of values) {
@@ -15,14 +19,6 @@ export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: 
   }
 }
 
-export function getLoggerError(error: unknown) {
-  return typeof error === "object" ? error : { error: error }
-}
-
-export function hasMember<T extends string>(value: unknown, member: T): value is { [member in T]: unknown } {
-  return typeof value === "object" && value !== null && member in value
-}
-
 export function htmlEncode(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
 }

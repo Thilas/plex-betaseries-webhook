@@ -42,13 +42,11 @@ describe("ErrorMiddleware", () => {
     // act
     filter.catch(fakeError, fakeReq, fakeRes)
     // assert
-    const expectedMessage = `${fakeMethod} ${fakeUrl}`
     resMock
       .verify((e) => e.status(500), Times.Once())
-      .verify((e) => e.send(`${expectedMessage}: ${fakeError.message}`), Times.Once())
+      .verify((e) => e.send("Internal Server Error"), Times.Once())
     loggerMock
-      .verify((e) => e.error(expectedMessage, fakeError), Times.Once())
-      .verify((e) => e.debug("Headers", { headers: fakeHeaders }), Times.Once())
-      .verify((e) => e.debug("Body", { params: fakeParams }), Times.Once())
+      .verify((e) => e.error(`${fakeMethod} ${fakeUrl}:`, fakeError), Times.Once())
+      .verify((e) => e.debug("Request details", { headers: fakeHeaders, params: fakeParams }), Times.Once())
   })
 })

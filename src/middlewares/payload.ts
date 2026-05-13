@@ -3,8 +3,7 @@ import { inject } from "inversify"
 import { ExpressMiddleware } from "@inversifyjs/http-express"
 import { WebhookRequest } from "../controllers/webhook"
 import { ids, provideSingleton } from "../decorators"
-import { ILogger } from "../logger"
-import { getLoggerError } from "../utils"
+import { ILogger, toLoggerError } from "../logger"
 
 @provideSingleton(PayloadMiddleware)
 export class PayloadMiddleware implements ExpressMiddleware {
@@ -16,7 +15,7 @@ export class PayloadMiddleware implements ExpressMiddleware {
       try {
         req.payload = JSON.parse(data) as Payload
       } catch (error) {
-        this.logger.error("Unable to parse payload", getLoggerError(error))
+        this.logger.error("Unable to parse payload:", toLoggerError(error))
       }
     }
     next()

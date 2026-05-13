@@ -3,9 +3,8 @@ import { inject } from "inversify"
 import { Configuration } from "../configuration"
 import { HealthCheckPath } from "../controllers/health-check"
 import { ids, provideSingleton } from "../decorators"
-import { ILogger } from "../logger"
+import { ILogger, toLoggerError } from "../logger"
 import { IProcess } from "../process"
-import { getLoggerError } from "../utils"
 import { HealthResponse } from "./models"
 
 enum HealthStatus {
@@ -35,7 +34,7 @@ export class HealthCheckClient implements IProcess {
         process.exitCode = HealthStatus.success
       }
     } catch (error) {
-      this.logger.error("Unexpected error", getLoggerError(error))
+      this.logger.error("Unexpected error:", toLoggerError(error))
       process.exitCode = HealthStatus.unhealthy
     }
   }

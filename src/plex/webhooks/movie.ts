@@ -12,7 +12,7 @@ export class MovieScrobbleWebhook implements IWebhook {
   constructor(
     @inject(ids.logger) readonly logger: ILogger,
     @inject(ids.mediaFactory) @named(PlexMovieType) readonly mediaFactory: PlexMovieFactory,
-  ) {}
+  ) { }
 
   async process(payload: Payload, member: BetaSeriesMember, info: WebhookManagerInfoLogMethod) {
     const media = this.mediaFactory.create(payload)
