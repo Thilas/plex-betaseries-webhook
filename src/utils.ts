@@ -24,5 +24,5 @@ export function hasMember<T extends string>(value: unknown, member: T): value is
 }
 
 export function htmlEncode(value: string) {
-  return value.replaceAll(/&/g, "&amp;").replaceAll(/</g, "&lt;").replaceAll(/>/g, "&gt;").replaceAll(/"/g, "&quot;")
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
 }

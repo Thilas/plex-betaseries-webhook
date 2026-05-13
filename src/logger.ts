@@ -22,7 +22,7 @@ export function getLogger() {
 }
 
 function getConsoleFormat() {
-  var formats = [
+  const formats = [
     format.timestamp(),
     format.errors({ cause: true, stack: true }),
   ]
