@@ -1,20 +1,22 @@
 import { createLogger, format, transports } from "winston"
 
-export function getLogger(): ILogger {
+const configuration = {
+  json: ["1", "TRUE", "YES"].includes(String(process.env.LOGGER_JSON).toUpperCase()),
+  production: String(process.env.NODE_ENV).toUpperCase() === "PRODUCTION",
+}
+
+export function getLogger() {
   const logger = createLogger({
     level: "debug",
-    format: getConsoleFormat(),
     handleExceptions: true,
     transports: [
       new transports.Console({
-        forceConsole: process.env.NODE_ENV !== "production",
+        forceConsole: !configuration.production,
+        format: getConsoleFormat(),
       }),
     ],
-  })
-  logger.debug("Logger environment variables", {
-    LOGGER_JSON: process.env.LOGGER_JSON ?? "undefined",
-    NODE_ENV: process.env.NODE_ENV ?? "undefined",
-  })
+  }) as ILogger
+  logger.debug("Logger configuration", configuration)
   return logger
 }
 
@@ -24,7 +26,7 @@ function getConsoleFormat() {
     format.errors({ cause: true, stack: true }),
   ]
 
-  if (["1", "TRUE", "YES"].includes(String(process.env.LOGGER_JSON).toUpperCase())) {
+  if (configuration.json) {
     formats.push(
       format.json(),
     )
