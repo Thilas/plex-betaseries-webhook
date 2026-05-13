@@ -3,9 +3,8 @@ import Url from "domurl"
 import { inject } from "inversify"
 import { ClientConfiguration, Configuration, getClientConfiguration } from "../configuration"
 import { ids, provideSingleton } from "../decorators"
-import { ILogger } from "../logger"
+import { ILogger, toLoggerError } from "../logger"
 import { ImdbId, MediaId, TmdbId, TvdbId } from "../plex/media/ids"
-import { getLoggerError } from "../utils"
 import { BetaSeriesEpisode, BetaSeriesMovie, BetaSeriesMovieStatus } from "./models"
 
 @provideSingleton(BetaSeries)
@@ -65,7 +64,7 @@ export class BetaSeries {
       this.logger.info(`Access token of ${login} checked`)
       return new BetaSeriesPrincipal(clientConfiguration, { accessToken, login })
     } catch (error) {
-      this.logger.debug("Invalid access token", getLoggerError(error))
+      this.logger.debug("Invalid access token:", toLoggerError(error))
       return new BetaSeriesPrincipal(clientConfiguration)
     }
   }

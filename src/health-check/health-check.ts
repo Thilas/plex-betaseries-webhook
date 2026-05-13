@@ -1,7 +1,7 @@
 import { inject, multiInject } from "inversify"
 import { ids, provideSingleton } from "../decorators"
-import { ILogger } from "../logger"
-import { getLoggerError, hasMember } from "../utils"
+import { ILogger, toLoggerError } from "../logger"
+import { hasMember } from "../utils"
 import { HealthComponent, HealthMeasurements, HealthResponse } from "./models"
 
 @provideSingleton(HealthCheckManager)
@@ -15,7 +15,7 @@ export class HealthCheckManager {
     try {
       return await this.getResponse()
     } catch (error) {
-      this.logger.error("Unable to check health", getLoggerError(error))
+      this.logger.error("Unable to check health:", toLoggerError(error))
       return this.createResponse({ status: "fail", output: this.getOutput(error) })
     }
   }
@@ -47,7 +47,7 @@ export class HealthCheckManager {
     try {
       return await healthCheck.invoke()
     } catch (error) {
-      this.logger.error(`Unable to check "${healthCheck.name}"`, getLoggerError(error))
+      this.logger.error(`Unable to check "${healthCheck.name}":`, toLoggerError(error))
       return {
         componentType: "system",
         output: this.getOutput(error),

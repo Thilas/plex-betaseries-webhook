@@ -35,7 +35,7 @@ describe("PayloadMiddleware", () => {
     // act
     middleware.execute(fakeReq, fakeRes, nextMock.object())
     // assert
-    loggerMock.verify((e) => e.error("Unable to parse payload", It.IsAny<Error>()), Times.Once())
+    loggerMock.verify((e) => e.error("Unable to parse payload:", It.IsAny<Error>()), Times.Once())
     nextMock.verify((e) => e(), Times.Once())
   })
 
