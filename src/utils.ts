@@ -19,10 +19,6 @@ export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: 
   }
 }
 
-export function hasMember<T extends string>(value: unknown, member: T): value is { [member in T]: unknown } {
-  return typeof value === "object" && value !== null && member in value
-}
-
 export function htmlEncode(value: string) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
 }

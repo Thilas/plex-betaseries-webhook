@@ -1,4 +1,4 @@
-import { delay, equalsCaseInsensitive, getFirstSupportedOrDefault, hasMember, htmlEncode } from "./utils"
+import { delay, equalsCaseInsensitive, getFirstSupportedOrDefault, htmlEncode } from "./utils"
 
 describe("delay", () => {
   //#region Timers
@@ -94,27 +94,6 @@ describe("getFirstSupportedOrDefault", () => {
     const result = getFirstSupportedOrDefault([new A(), new C(), new B()] as Base[], [B, C])
     // assert
     expect(result).toEqual(new B())
-  })
-})
-
-describe("hasMember", () => {
-  const expectedValue = "value"
-  const sut = { a: expectedValue } as unknown
-
-  it("returns false if the object doesn't have a specific member", () => {
-    // act
-    const result = hasMember(sut, "b")
-    // assert
-    expect(result).toBeFalsy()
-    expect(result ? sut.b : expectedValue).toEqual(expectedValue)
-  })
-
-  it("returns true if the object has a specific member", () => {
-    // act
-    const result = hasMember(sut, "a")
-    // assert
-    expect(result).toBeTruthy()
-    expect(result ? sut.a : undefined).toEqual(expectedValue)
   })
 })
 

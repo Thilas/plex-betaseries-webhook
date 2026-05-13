@@ -4,7 +4,6 @@ import { CatchError } from "@inversifyjs/http-core"
 import { ExpressErrorFilter } from "@inversifyjs/http-express"
 import { ids } from "../decorators"
 import { ILogger, toLoggerError } from "../logger"
-import { hasMember, htmlEncode } from "../utils"
 
 @CatchError()
 export class GlobalErrorFilter implements ExpressErrorFilter {
@@ -16,6 +15,6 @@ export class GlobalErrorFilter implements ExpressErrorFilter {
     this.logger.debug("Request details", { headers: request.headers, params: request.params })
     const message = `${request.method} ${request.originalUrl}:`
     this.logger.error(message, toLoggerError(err))
-    response.status(500).send(htmlEncode(`${message} ${hasMember(err, "message") ? err.message : err}`))
+    response.status(500).send("Internal Server Error")
   }
 }
