@@ -45,7 +45,7 @@ describe("ErrorMiddleware", () => {
     const expectedMessage = `${fakeMethod} ${fakeUrl}:`
     resMock
       .verify((e) => e.status(500), Times.Once())
-      .verify((e) => e.send(`${expectedMessage} ${fakeError.message}`), Times.Once())
+      .verify((e) => e.send("Internal Server Error"), Times.Once())
     loggerMock
       .verify((e) => e.error(expectedMessage, fakeError), Times.Once())
       .verify((e) => e.debug("Request details", { headers: fakeHeaders, params: fakeParams }), Times.Once())
