@@ -1,8 +1,9 @@
 import { createLogger, format, transports } from "winston"
+import { equalsCaseInsensitive } from "./utils"
 
 const configuration = {
-  json: ["1", "TRUE", "YES"].includes(String(process.env.LOGGER_JSON).toUpperCase()),
-  production: String(process.env.NODE_ENV).toUpperCase() === "PRODUCTION",
+  json: ["1", "true", "yes"].some((v) => equalsCaseInsensitive(process.env.LOGGER_JSON, v)),
+  production: equalsCaseInsensitive(process.env.NODE_ENV, "production"),
 }
 
 export function getLogger() {

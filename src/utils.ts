@@ -7,6 +7,10 @@ export function delay(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
 
+export function equalsCaseInsensitive(a: string | undefined, b: string) {
+  return a?.localeCompare(b, undefined, { sensitivity: "accent" }) === 0
+}
+
 export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: T[], types: C[]) {
   for (const type of types) {
     for (const value of values) {
@@ -20,5 +24,5 @@ export function hasMember<T extends string>(value: unknown, member: T): value is
 }
 
 export function htmlEncode(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+  return value.replaceAll(/&/g, "&amp;").replaceAll(/</g, "&lt;").replaceAll(/>/g, "&gt;").replaceAll(/"/g, "&quot;")
 }

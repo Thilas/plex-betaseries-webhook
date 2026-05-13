@@ -12,7 +12,7 @@ export const PlexMovieType = "movie"
 @provideSingleton(PlexMovieFactory)
 @provideMediaFactory(PlexMovieType)
 export class PlexMovieFactory implements IMediaFactory<MovieMediaId> {
-  constructor(@inject(ids.logger) readonly logger: ILogger) {}
+  constructor(@inject(ids.logger) readonly logger: ILogger) { }
 
   create(payload: Payload): IMedia<MovieMediaId> {
     const allIds = getMediaIds(this.logger, payload.Metadata?.Guid)
@@ -29,7 +29,7 @@ export class PlexMovieFactory implements IMediaFactory<MovieMediaId> {
 }
 
 class PlexMovie implements IMedia<MovieMediaId> {
-  constructor(readonly id: MovieMediaId, readonly title: string) {}
+  constructor(readonly id: MovieMediaId, readonly title: string) { }
 
   toString() {
     return `${this.title} (${this.id.toString()})`

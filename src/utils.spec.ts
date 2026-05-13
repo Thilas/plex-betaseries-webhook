@@ -1,4 +1,4 @@
-import { delay, getFirstSupportedOrDefault, hasMember, htmlEncode } from "./utils"
+import { delay, equalsCaseInsensitive, getFirstSupportedOrDefault, hasMember, htmlEncode } from "./utils"
 
 describe("delay", () => {
   //#region Timers
@@ -21,6 +21,36 @@ describe("delay", () => {
     // assert
     expect(setTimeout).toHaveBeenCalledTimes(1)
     expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), ms)
+  })
+})
+
+describe("equalsCaseInsensitive", () => {
+  it("returns false if an input is undefined", () => {
+    // act
+    const result = equalsCaseInsensitive(undefined, "value")
+    // assert
+    expect(result).toBeFalsy()
+  })
+
+  it("returns false if the inputs are different", () => {
+    // act
+    const result = equalsCaseInsensitive("value1", "value2")
+    // assert
+    expect(result).toBeFalsy()
+  })
+
+  it("returns true if the inputs are strictly equal", () => {
+    // act
+    const result = equalsCaseInsensitive("value", "value")
+    // assert
+    expect(result).toBeTruthy()
+  })
+
+  it("returns true if the inputs are equal", () => {
+    // act
+    const result = equalsCaseInsensitive("Value", "value")
+    // assert
+    expect(result).toBeTruthy()
   })
 })
 
@@ -91,10 +121,10 @@ describe("hasMember", () => {
 describe("htmlEncode", () => {
   it.each([
     ["value", "value"],
-    ["va&lue", "va&amp;lue"],
+    ["va&l&ue", "va&amp;l&amp;ue"],
     ['"value"', "&quot;value&quot;"],
     ["<value>", "&lt;value&gt;"],
-  ])('encodes "%s" to HTML', (value, expected) => {
+  ])('encodes "%s" to HTML', (value: string, expected: string) => {
     // act
     const result = htmlEncode(value)
     // assert

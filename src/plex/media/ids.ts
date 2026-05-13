@@ -38,7 +38,7 @@ export function formatMediaIds(values: BaseId[]) {
 }
 
 abstract class BaseId<T extends string = string> {
-  protected constructor(readonly kind: T, readonly value: string) {}
+  protected constructor(readonly kind: T, readonly value: string) { }
   toString() {
     return `${this.value}@${this.kind}`
   }

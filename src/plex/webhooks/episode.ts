@@ -11,7 +11,7 @@ export class EpisodeScrobbleWebhook implements IWebhook {
   constructor(
     @inject(ids.logger) readonly logger: ILogger,
     @inject(ids.mediaFactory) @named(PlexEpisodeType) readonly mediaFactory: PlexEpisodeFactory,
-  ) {}
+  ) { }
 
   async process(payload: Payload, member: BetaSeriesMember, info: WebhookManagerInfoLogMethod) {
     const media = this.mediaFactory.create(payload)

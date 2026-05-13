@@ -12,7 +12,7 @@ export const PlexEpisodeType = "episode"
 @provideSingleton(PlexEpisodeFactory)
 @provideMediaFactory(PlexEpisodeType)
 export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
-  constructor(@inject(ids.logger) readonly logger: ILogger) {}
+  constructor(@inject(ids.logger) readonly logger: ILogger) { }
 
   create(payload: Payload): IMedia<EpisodeMediaId> {
     const allIds = getMediaIds(this.logger, payload.Metadata?.Guid)
@@ -25,7 +25,7 @@ export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
         `Unsupported episode id for ${title} ${formatEpisode(season, episode)}: ${formatMediaIds(allIds)}.`,
       )
     }
-    if (!title || typeof season === "undefined" || typeof episode === "undefined") {
+    if (!title || !season || !episode) {
       throw new Error(
         `Invalid episode: ${title ?? "<unknown title>"} ${formatEpisode(season, episode)} (${id.toString()}).`,
       )
@@ -35,7 +35,7 @@ export class PlexEpisodeFactory implements IMediaFactory<EpisodeMediaId> {
 }
 
 class PlexEpisode implements IMedia<EpisodeMediaId> {
-  constructor(readonly id: EpisodeMediaId, readonly title: string, readonly season: number, readonly episode: number) {}
+  constructor(readonly id: EpisodeMediaId, readonly title: string, readonly season: number, readonly episode: number) { }
 
   toString() {
     return `${this.title} ${formatEpisode(this.season, this.episode)} (${this.id.toString()})`
