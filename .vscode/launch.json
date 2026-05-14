@@ -9,6 +9,9 @@
       "request": "launch",
       "name": "Launch Program",
       "preLaunchTask": "Build",
+      "env": {
+        "LOGGER_CONSOLE": "true"
+      },
       "runtimeArgs": ["--unhandled-rejections=strict"],
       "program": "${workspaceFolder}/src/app.ts",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
@@ -31,6 +34,9 @@
       "request": "launch",
       "name": "Launch HealthCheck",
       "preLaunchTask": "Build",
+      "env": {
+        "LOGGER_CONSOLE": "true"
+      },
       "runtimeArgs": ["--unhandled-rejections=strict"],
       "program": "${workspaceFolder}/src/health-check.ts",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]

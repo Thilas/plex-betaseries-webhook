@@ -22,3 +22,7 @@ export function getFirstSupportedOrDefault<T, C extends Constructor<T>>(values: 
 export function htmlEncode(value: string) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
 }
+
+export function toBoolean(value: string | undefined) {
+  return ["1", "true", "yes"].some((v) => equalsCaseInsensitive(value, v))
+}

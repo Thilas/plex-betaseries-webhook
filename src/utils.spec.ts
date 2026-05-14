@@ -1,4 +1,4 @@
-import { delay, equalsCaseInsensitive, getFirstSupportedOrDefault, htmlEncode } from "./utils"
+import { delay, equalsCaseInsensitive, getFirstSupportedOrDefault, htmlEncode, toBoolean } from "./utils"
 
 describe("delay", () => {
   //#region Timers
@@ -106,6 +106,27 @@ describe("htmlEncode", () => {
   ])('encodes "%s" to HTML', (value: string, expected: string) => {
     // act
     const result = htmlEncode(value)
+    // assert
+    expect(result).toEqual(expected)
+  })
+})
+
+describe("toBoolean", () => {
+  it.each([
+    [undefined, false],
+    ["0", false],
+    ["false", false],
+    ["False", false],
+    ["no", false],
+    ["No", false],
+    ["1", true],
+    ["true", true],
+    ["True", true],
+    ["yes", true],
+    ["Yes", true],
+  ])('converts "%s" to boolean', (value: string | undefined, expected: boolean) => {
+    // act
+    const result = toBoolean(value)
     // assert
     expect(result).toEqual(expected)
   })
