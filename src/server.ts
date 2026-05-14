@@ -2,7 +2,7 @@ import { Container, inject } from "inversify"
 import { InversifyExpressHttpAdapter } from "@inversifyjs/http-express"
 import { Configuration } from "./configuration"
 import { ids, provideSingleton } from "./decorators"
-import { ILogger } from "./logger"
+import { ILogger, toInversifyLogger } from "./logger"
 import { GlobalErrorFilter } from "./middlewares/error"
 import { IProcess } from "./process"
 
@@ -18,7 +18,7 @@ export class Server implements IProcess {
     const adapter = new InversifyExpressHttpAdapter(
       this.container,
       {
-        logger: true,
+        logger: toInversifyLogger(this.logger),
         useJson: true,
       },
     )

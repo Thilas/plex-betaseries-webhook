@@ -1,7 +1,5 @@
 FROM node:24-alpine
 
-ENV NODE_ENV=production
-
 WORKDIR /home/node/app
 COPY . .
 RUN ["npm", "ci", "--omit=dev"]

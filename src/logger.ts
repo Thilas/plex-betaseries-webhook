@@ -1,9 +1,10 @@
-import { createLogger, format, transports } from "winston"
-import { equalsCaseInsensitive } from "./utils"
+import type Inversify from "@inversifyjs/logger"
+import { createLogger, format, Logger, transports } from "winston"
+import { toBoolean } from "./utils"
 
 const configuration = {
-  json: ["1", "true", "yes"].some((v) => equalsCaseInsensitive(process.env.LOGGER_JSON, v)),
-  production: equalsCaseInsensitive(process.env.NODE_ENV, "production"),
+  console: toBoolean(process.env.LOGGER_CONSOLE),
+  json: toBoolean(process.env.LOGGER_JSON),
 }
 
 export function getLogger() {
@@ -12,7 +13,7 @@ export function getLogger() {
     handleExceptions: true,
     transports: [
       new transports.Console({
-        forceConsole: !configuration.production,
+        forceConsole: configuration.console,
         format: getConsoleFormat(),
       }),
     ],
@@ -64,3 +65,7 @@ interface LogMethod {
 }
 
 type LoggerError = ReturnType<typeof toLoggerError>
+
+export function toInversifyLogger(logger: ILogger) {
+  return logger as unknown as Logger as Inversify.Logger
+}

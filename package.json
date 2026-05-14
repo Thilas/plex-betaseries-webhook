@@ -14,6 +14,7 @@
     "@inversifyjs/binding-decorators": "^3.0.0",
     "@inversifyjs/http-core": "^5.4.5",
     "@inversifyjs/http-express": "^5.4.5",
+    "@inversifyjs/logger": "^2.0.0",
     "axios": "^1.16.1",
     "config": "^4.4.1",
     "domurl": "^2.3.4",
