@@ -5,9 +5,17 @@ updates:
     directory: /
     schedule:
       interval: daily
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
 
   # Maintain dependencies for npm
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: daily
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
