@@ -4,6 +4,7 @@
   "description": "Plex webhook to mark series and movies as watched on BetaSeries.",
   "main": "src/app.ts",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand --collect-coverage",
