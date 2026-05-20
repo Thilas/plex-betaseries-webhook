@@ -36,8 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           semantic_version: 25.0.3
-          extends: semantic-release-npm-github-publish@v1.7.7
-          tag_format: ${version}
+          extra_plugins: conventional-changelog-conventionalcommits@9
 
       - name: New release published
         if: steps.semantic.outputs.new_release_published == 'true'

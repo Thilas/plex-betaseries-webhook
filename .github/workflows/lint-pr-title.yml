@@ -15,18 +15,6 @@ jobs:
       - name: Lint PR title
         uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         id: lint_pr_title
-        # with:
-        #   types: |
-        #     feat
-        #     fix
-        #     docs
-        #     style
-        #     refactor
-        #     perf
-        #     test
-        #     build
-        #     ci
-        #     chore
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
