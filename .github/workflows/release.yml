@@ -33,12 +33,10 @@ jobs:
         uses: cycjimmy/semantic-release-action@b12c8f6015dc215fe37bc154d4ad456dd3833c90 # v6.0.0
         id: semantic
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
         with:
           semantic_version: 25.0.3
-          # extra_plugins: conventional-changelog-conventionalcommits@9
-          extends: semantic-release-npm-github-publish@v1.7.7
-          tag_format: ${version}
+          extra_plugins: conventional-changelog-conventionalcommits@9
 
       - name: New release published
         if: steps.semantic.outputs.new_release_published == 'true'
