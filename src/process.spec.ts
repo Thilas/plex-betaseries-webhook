@@ -1,5 +1,5 @@
-import { injectable } from "inversify"
 import { container } from "./container"
+import { injectable } from "inversify"
 import { IProcess, startProcess } from "./process"
 
 describe("process", () => {
