@@ -4,5 +4,6 @@
     "config:best-practices",
     ":semanticCommits"
   ],
-  "labels": ["dependencies", "{{datasource}}"]
+  "labels": ["dependencies", "{{datasource}}"],
+  "automerge": true
 }
