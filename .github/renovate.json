@@ -4,6 +4,7 @@
     "config:best-practices",
     ":semanticCommits"
   ],
+  "automerge": true,
   "labels": ["dependencies", "{{datasource}}"],
-  "automerge": true
+  "minimumReleaseAge": "3 days"
 }
