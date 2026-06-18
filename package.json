@@ -23,7 +23,7 @@
     "inversify": "8.1.0",
     "js-yaml": "4.2.0",
     "md5": "2.3.0",
-    "multer": "2.1.1",
+    "multer": "2.2.0",
     "reflect-metadata": "0.2.2",
     "serve-favicon": "2.5.1",
     "winston": "3.19.0"
