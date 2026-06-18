@@ -2,7 +2,8 @@ name: Release
 
 on:
   schedule:
-    - cron: 0 0 * * 0
+    - cron: 0 6 * * *
+      timezone: Europe/Paris
   workflow_dispatch:
 
 env:
