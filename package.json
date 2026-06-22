@@ -34,7 +34,7 @@
     "@types/jest": "30.0.0",
     "@types/md5": "2.3.6",
     "@types/multer": "2.1.0",
-    "@types/node": "25.9.3",
+    "@types/node": "25.9.4",
     "@types/serve-favicon": "2.5.7",
     "@types/supertest": "7.2.0",
     "@typescript-eslint/eslint-plugin": "8.61.1",
