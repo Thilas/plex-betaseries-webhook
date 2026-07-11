@@ -20,7 +20,7 @@
     "config": "4.4.2",
     "domurl": "2.3.4",
     "express": "5.2.1",
-    "inversify": "8.1.1",
+    "inversify": "8.1.2",
     "js-yaml": "5.2.1",
     "md5": "2.3.0",
     "multer": "2.2.0",
