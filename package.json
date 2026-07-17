@@ -36,7 +36,7 @@
     "@types/multer": "2.2.0",
     "@types/node": "25.9.5",
     "@types/serve-favicon": "2.5.7",
-    "@types/supertest": "7.2.0",
+    "@types/supertest": "7.2.1",
     "@typescript-eslint/eslint-plugin": "8.64.0",
     "@typescript-eslint/parser": "8.64.0",
     "axios-mock-adapter": "2.1.0",
