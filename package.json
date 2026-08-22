@@ -17,7 +17,7 @@
     "@inversifyjs/http-express": "5.5.1",
     "@inversifyjs/logger": "2.0.0",
     "axios": "1.18.1",
-    "config": "5.0.0",
+    "config": "5.0.1",
     "domurl": "2.3.4",
     "express": "5.2.1",
     "inversify": "8.2.3",
