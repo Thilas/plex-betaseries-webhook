@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@inversifyjs/binding-decorators": "3.0.0",
-    "@inversifyjs/http-core": "5.5.1",
+    "@inversifyjs/http-core": "5.5.2",
     "@inversifyjs/http-express": "5.5.1",
     "@inversifyjs/logger": "2.0.0",
     "axios": "1.18.1",
