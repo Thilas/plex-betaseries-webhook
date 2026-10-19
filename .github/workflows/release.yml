@@ -38,7 +38,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Semantic release
-        uses: cycjimmy/semantic-release-action@9e1f8a3ef91f1097285028e799a5fb8bb90e8899 # v8.1.0
+        uses: cycjimmy/semantic-release-action@163a6cb7b5dbc4d0f079efca0e465814acb94d39 # v8.1.1
         id: semantic
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
