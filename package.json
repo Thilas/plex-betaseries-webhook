@@ -12,7 +12,7 @@
     "health-check": "node --unhandled-rejections=strict dist/health-check.js"
   },
   "dependencies": {
-    "@inversifyjs/binding-decorators": "3.0.0",
+    "@inversifyjs/binding-decorators": "3.0.1",
     "@inversifyjs/http-core": "5.9.1",
     "@inversifyjs/http-express": "5.9.1",
     "@inversifyjs/logger": "2.0.0",
