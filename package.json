@@ -29,7 +29,7 @@
     "winston": "3.19.0"
   },
   "devDependencies": {
-    "@tsconfig/node26": "26.0.0",
+    "@tsconfig/node26": "26.0.2",
     "@types/domurl": "2.3.0",
     "@types/jest": "30.0.0",
     "@types/md5": "2.3.6",
