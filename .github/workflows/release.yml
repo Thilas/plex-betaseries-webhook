@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
         with:
-          semantic_version: 25.0.9
+          semantic_version: 26.0.1
           extra_plugins: conventional-changelog-conventionalcommits@9
 
       - name: New release published
